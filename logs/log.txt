@@ -1,0 +1,216 @@
+
+                        Fourmilab Fireworks
+                          Development Log
+
+2021 October 8
+
+Downloaded fireworks texture from Shutterstock:
+    https://www.shutterstock.com/image-vector/firework-boom-flame-colorful-festive-seamless-726887620
+under unlimited Web license as part of my subscription.  Dornloaded
+into textures/shutterstock_726887620.eps.
+
+Converted this image into a 5000x5000 PNG with:
+    gs -dSAFER -dBATCH -dNOPAUSE -dNOPROMPT -dMaxBitmap=500000000 \
+        -dEPSCrop -dAlignToPixels=0 -dGridFitTT=2 -sDEVICE=pngalpha \
+        -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dUseCIEColor -r300x300 \
+        -dProcessColorModel=/DeviceRGB -sOUTPUTFILE=fireworks.png \
+        shutterstock_726887620.eps
+
+Scaled the image to a 512x512 texture, fireworks_512.png.
+
+2021 October 9
+
+Fireworks sound effects:
+    https://www.soundeffectsplus.com/product/fireworks-exploding-01/
+    https://www.soundeffectsplus.com/product/fireworks-exploding-02/
+    https://www.soundeffectsplus.com/product/fireworks-exploding-03/
+    https://www.soundeffectsplus.com/product/fireworks-exploding-04/
+    https://www.soundeffectsplus.com/product/fireworks-exploding-05/
+    https://www.soundeffectsplus.com/product/firework-explosion-01/
+    https://www.soundeffectsplus.com/product/firework-explosion-02/
+    https://www.soundeffectsplus.com/product/firework-explosion-03/
+    https://www.soundeffectsplus.com/product/firework-explosion-04/
+
+2021 October 13
+
+Replaced the base script_processor.lsl with the one from Gridmark
+which supports the Script wait command to align with a timed
+interval.
+
+Rewrote the execution logic in firework_shell.lsl to replace the
+llSleep() calls for sequencing with timed events and a state machine
+to execute the events at each phase.  This guarantees the script
+remains responsive to messages while it is executing the launch and
+detonation of a shell.
+
+Implemented the Legend command to set the floating text legend:
+    Legend [ <r, g, b> ] Any text
+If the text includes <channel>, it is replaced by the command channel
+on which we're listening.
+
+Changed the touch event handler to run a script called Touch.  This
+allows you to do anything you wish with the event.
+
+Revised the way shells are chosen by the launcher to pick
+from the aShells list.  The list now contains the link numbers
+of the shells.  When a shell is launched, its link is removed
+from the list and it is returned when it sends a LM_FS_IDLE
+upon completion of the launch and detonation sequence.  This
+will allow handling of requests when no shells are available.
+
+2021 October 14
+
+Redesigned the Salvo command to be driven from the timer instead of
+sleeping the main process.  This required adding logic to multiplex
+the timer between its use in timing out menu listeners and salvos,
+which is accomplished in the new function windCat() which is called
+whenever a new timer task is enqueued.
+
+Added the ability to cancel an in-progress salvo by specifying Salvo 0.
+
+2021 October 16
+
+Completed implementation of the "deferred launch" facility and, in
+the process, discovered a nasty gotcha in list manipulation.  Whenever
+the Launch command is about to fire a shell, it checks the number of
+free shells in the aShells list and picks the oldest.  If the list is
+empty, this means all shells are busy.  In that case, it appends the
+Launch command (complete command string) onto the deferLaunch list
+and immediately returns.  When a shell completes its detonation
+sequence and sends a LM_FS_IDLE message back to the main script, that
+script checks whether one or more deferred commands are waiting and,
+if so, re-submits the oldest to processCommand().
+
+The logic in the Launch command that removed a shell from aShells did
+so in the following way:
+    aShells = llList2List(aShells, 1, -1);
+which works fine so long as aShells has two or more entries, but if
+it has only 1, the start index is off the end of the list and
+llList2List returns the item, not a null list as you'd expect.  In
+a case like this, you must use:
+    aShells = llDeleteSubList(aShells, 0, 0);
+for it to behave properly in all circumstances including taking the
+last item from a list.
+
+With this code and fix, rapid-fire explicit Launch commands and salvos
+properly wait for available shells if they exhaust the number present.
+
+Implemented a Wait command which causes a script suspend if one or more
+firework shells are busy or a salvo is in progress.  The script suspend
+is released when all shells are idle and no salvo is active.  This is
+for use in scripts which wish to wait for concurrent shell activity to
+complete before, for example, closing the hat or starting a pause
+before the next salvo.
+
+2021 October 17
+
+Added a LM_SP_SETTINGS message to communicate the trace and echo
+settings to the Script Processor and added code to the main script to
+send it whenever settings change.
+
+2021 October 18
+
+Declaration of an audio clip defined by a UUID didn't work because
+it neglected to make the dictionary entry for the clip.  Fixed.
+
+2021 October 20
+
+Created local development Git repository in:
+    ~/w/SecondLife/Fireworks/git
+with:
+    git init
+
+Logged on to github.com.
+
+Created a new repository:
+    fireworks
+with access URLs:
+    HTTPS: https://github.com/Fourmilab/fireworks.git
+    SSH:   git@github.com:Fourmilab/fireworks.git
+
+Linked the local repository to the GitHub archive:
+    git remote add origin git@github.com:Fourmilab/fireworks.git
+
+Committed the *.md files in the repository root and the
+marketplace/images files to which they link.
+
+Confirmed that my local "git sync" command works with the remote
+repository.
+
+The documents in the repository root now work properly.
+
+Made a test script and verified that "Script pause region" is working
+as intended.  This makes it easy to set up a hat which announces its
+arrival in any new region (allowing scripts) with a fireworks show.
+
+Verified that the "Script resume" command works for escaping from a
+timed wait or "Script pause touch".
+
+The handling of the touch event in resuming after a "Script pause
+touch" command conflicted with the launch of a script named "Touch" in
+the main script.  I added code so the main script ignores touch events
+if no "Script: Touch" is present in the inventory.  This means that you
+can't use both meanings of touch simultaneously, but why would you want
+to?
+
+2021 October 21
+
+Removed the Calculator and "Calc" command.  This was only included for
+development and debugging and is no longer useful.
+
+If the user set the salvo interval to 0 ("Set interval 0 0", for
+example), the timer would be set to zero, cancelling the timer and
+hanging up the script.  I added code which checks for a zero time and
+forces the interval to 0.001 seconds.  Further, if the computed time to
+the next shot is less than 0.01 seconds, we skip using the timer
+entirely and, if a shell is available, launch immediately.  This makes
+end of show blowouts work much better, assuming you have sufficient
+shells.
+
+Replaced the hard-coded setting of the floating text legend to the chat
+channel with a Legend command in the Configuration script.  In the
+process I ran into and fixed a bug in replacing "<channel>" in legend
+text with the channel number: if "<channel>" was the last thing in the
+string, the code which tried to replace it woulld trip over the old
+gotcha that -1 means the end of string and not replace it properly.  I
+rewrote the code to use llDeleteSubString() and llInsertString() to
+avoid the problem.
+
+The Salvo command was firing one shell too many.  Fixed.
+
+Made the Fireworks Shell script respond to the Script Processor
+messages LM_SP_STAT and LM_SP_SETTINGS to report its status and set the
+local trace mode.  If trace mode is enabled, each launch is reported
+with the ascent and burst effect and burst location.  The main script
+now sends these messages to LINK_SET so all the shells receive them.
+
+2021 October 21
+
+Added the ability to specify arguments on the Salvo command which are
+used on the Launch commands it performs.
+
+Added a countdown indicator to the LaSalvo commands generated by the
+Salvo command to indicate how many shots remain.
+
+Added a "Play" command to immediately play an Audio clip declared in
+the main script.  The clip is actually played in the Hat Top script
+to avoid it clashing with other sound clips.
+
+Given that we now have a script in Hat Top, I pressed it into service
+as an auxiliary services script and offshored memory-intensive code
+from the main script to it, including:
+    *   Legend command
+    *   Status command (main script sends numbers, Aux script edits)
+Moving the Status command to an auxiliary script allowed removing
+the large ef() function family from it, bringing our memory use down
+to a comfortable 81%.
+
+With the Status command no longer on the critical path, added display
+of all status items a user is likely to wish to see.
+
+2021 October 22
+
+Performed initial Git commit of scripts, notecards, sounds, textures,
+marketplace description, and this log.
+
+

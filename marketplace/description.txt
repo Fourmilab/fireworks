@@ -1,0 +1,19 @@
+Fourmilab Fireworks is a fireworks launcher which is programmable, versatile, extensible, free, and sold with full permissions (including all of its scripts).  It may be worn as an avatar accessory (usually as a hat) or rezzed as an object in-world.  It can be controlled by commands in local chat or programmed from scripts in notecards, and can run pre-programmed shows at scheduled times.  Fireworks burst effects are fully programmable by commands declared in notecards and can display any particle system effect possible in Second Life.  Launch and burst sounds are sound clips, to which the owner can add their own sounds.
+
+Land Impact and Permissions
+
+When worn as an avatar accessory, Fourmilab Fireworks has no land impact or creation permissions required.  When rezzed as an object, it requires permissions to create objects and has a land impact of 8 for the standard configuration.  If you require the ability to launch more than the default number of fireworks simultaneously, this impact will increase by one for each additional firework you add.
+
+Development Kit
+
+Fourmilab Fireworks is delivered including a development kit containing all of the object components, models, textures, scripts, and documents used in the objects.  All items including scripts, have “full permissions” (copy, modify, and transfer), so that you can use them as the basis for your own development projects and/or share them with other users in Second Life.
+
+Source code for this project is maintained on and available from the GitHub repository:
+    https://github.com/Fourmilab/fireworks
+
+License
+
+This product (software, documents, images, and original models) is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+    http://creativecommons.org/licenses/by-sa/4.0/
+    https://creativecommons.org/licenses/by-sa/4.0/legalcode
+You are free to copy and redistribute this material in any medium or format, and to remix, transform, and build upon the material for any purpose, including commercially.  You must give credit, provide a link to the license, and indicate if changes were made.  If you remix, transform, or build upon this material, you must distribute your contributions under the same license as the original.

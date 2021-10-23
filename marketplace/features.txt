@@ -1,0 +1,7 @@
+Fireworks launcher wearable as an avatar accessory or rezzed in-world
+
+Fully programmable: firework effects and sounds can be customised by owner
+
+Firework shows can be scripted and set to run at scheduled times
+
+Full permissions: all objects and scripts are copy/modify/transfer
