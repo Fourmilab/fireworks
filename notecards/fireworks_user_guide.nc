@@ -33,23 +33,23 @@ is rare to find one that doesn't.
 REZZING THE LAUNCHER IN-WORLD
 
 In addition to wearing the Fireworks launcher on your avatar, you can
-use it as an object in world. The launcher has a land impact of 8 (plus
-one more for every additional firework shell you have added in addition
-to the default five).  Just drag it from your inventory to the desired
+use it as an object in-world. The launcher has a land impact of 8 (plus
+one more for every additional firework shell you have added to the
+default five).  Just drag it from your inventory to the desired
 location and you're good to go.  You can create as many launchers as
 you wish, limited only by your parcel's prim capacity.  If you create
-multiple launchers in proximity to one another, you may want to
-assign them different chat channels (see the Channel command below)
-so you can control each independently.
+multiple launchers in proximity to one another, you may want to assign
+them different chat channels (see the Channel command below) so you can
+control each independently.
 
 CHAT COMMANDS
 
 Fourmilab Fireworks accepts commands submitted on local chat channel
 1749 (the date of composition of George Frideric Handel's Music for the
 Royal Fireworks, HWV 351) and responds in local chat.  Commands are as
-follows.  Most chat commands and parameters, except those specifying
+follow.  (Most chat commands and parameters, except those specifying
 names from the inventory, may be abbreviated to as few as two
-characters and are insensitive to upper and lower case.
+characters and are insensitive to upper and lower case.)
 
     Access public/group/owner
         Specifies who can send commands to the launcher.  You can
@@ -58,17 +58,17 @@ characters and are insensitive to upper and lower case.
 
     Audio sound[=UUID] ...
         Declare one or more sound clips to be used for launch and burst
-        sound effects.  An audio clip can either be in the inventory of
-        the fireworks launcher or specified as the UUID/key of a
-        publicly accessible sound clip elsewhere on the Second Life
-        grid.  Sound clips specified by UUID are given a name with the
-        UUID followed by an equal sign.  For example, to use the
-        built-in thunder sound, you could declare:
-            Audio thunder=e95c96a5-293c-bb7a-57ad-ce2e785ad85f
-        and then specify “thunder” on a Launch command or in the
-        declaration of a group of explosion sounds.  All sound names,
-        whether from the inventory or by UUID, must use only lower case
-        letters and inventory sound clip names must be identical.
+        sound effects or the Play command.  An audio clip can either be
+        in the inventory of the fireworks launcher or specified as the
+        UUID/key of a publicly accessible sound clip elsewhere on the
+        Second Life grid.  Sound clips specified by UUID are given a
+        name with the UUID followed by an equal sign.  For example, to
+        use the built-in thunder sound, you could declare: Audio
+        thunder=e95c96a5-293c-bb7a-57ad-ce2e785ad85f and then specify
+        “thunder” on a Launch command or in the declaration of a group
+        of explosion sounds.  All sound names, whether from the
+        inventory or by UUID, must use only lower case letters and
+        inventory sound clip names must be identical.
 
     Boot
         Reset the script.  All settings will be restored to their
@@ -85,18 +85,34 @@ characters and are insensitive to upper and lower case.
         Send vertical white space to local chat to separate output when
         debugging.
 
+    Delete name
+        Delete the item (Audio, Group, Optical, or URL) with the given
+        name from the dictionary.  This can be used to reclaim space
+        when you're loading different sets of effects for shows, and is
+        particularly handy when you want to update an Optical
+        definition. The old definition must be deleted before the new
+        is declared to avoid its items being appended to the previous
+        definition.
+
     Echo text
         Echo the text in local chat.  This allows scripts to send
         messages to those running them to let them know what they're
         doing.
 
+    Embed name
+        Start streaming audio from the named URL or, if the name is a
+        Group, from a randomly chosen member of it.  You can only have
+        one audio source streaming at a time, and there is no way to
+        detect whether the source is still playing.  An Embed command
+        with no name will stop the currenly playing source.
+
     Group gname member1 ...
         Define a group named gname consisting of the named members.
-        Members may be previously declared Audio or Optical effects, or
-        the name of Groups containing the same kind of effects (and,
-        possibly, other Groups).  When a group name is specified on a
-        Launch command, one of the items it contains will be chosen at
-        random.
+        Members may be previously declared Audio, Optical effects,
+        URLS, or the name of Groups containing the same kind of effects
+        (and, possibly, other Groups).  When a group name is specified
+        on an Embed, Launch, Play, or Salvo command, one of the items
+        it contains will be chosen at random.
 
     Help
         Send this notecard to the requester.
@@ -137,9 +153,9 @@ characters and are insensitive to upper and lower case.
         itemname” is run.  The itemname of the script must be spelled
         exactly the same as in the Menu command.
 
-    Optical oname key1 arg1 key2 arg2 ...
-        Declare a Optical effect named oname with the key, arg pairs
-        that follow on the command line.  Please see the section
+    Optical oname key1 value1 key2 value2 ...
+        Declare a Optical effect named oname with the key and value
+        pairs that follow on the command line.  Please see the section
         DEFINING OPTICAL EFFECTS below for details.
 
     Play audio
@@ -253,7 +269,7 @@ characters and are insensitive to upper and lower case.
             are launched between min and max, in degrees or radians
             according to the Set angles setting.  If no max is
             specified, the min setting will be used, setting a fixed
-            elevation.  Default is 0 to 90 degrees (all elevations
+            elevation.  Default is 45 to 90 degrees (all elevations
             above the horizon).
 
         Set interval min [ max ]
@@ -268,7 +284,7 @@ characters and are insensitive to upper and lower case.
             Sets the minimum and maximum radius (distance of flight)
             for shells, in metres.  If max is omitted, the min value
             will be used and all shells will be launched with the same
-            radius.  The default minimum is 1.5 metres and maximum 3
+            radius.  The default minimum is 2 metres and maximum 5
             metres.
 
         Set top on/off
@@ -286,6 +302,11 @@ characters and are insensitive to upper and lower case.
 
     Status
         Show status of the script, including settings and memory usage.
+
+    URL uname https://...
+        Declares the URL for a streaming audio source called uname.
+        You can then use uname in an Embed command or place it within
+        a Group of other audio sources.
 
     Wait
         Pause script execution until all launched fireworks have
@@ -375,9 +396,11 @@ spherical burst effect from the standard configuration notecard.
 Here we use the negative colour trick so bursts will have randomly
 chosen hues.
 
+THE OPTICAL EFFECT COMPILER
+
 Developing, debugging, and optimising optical effects can be a fussy,
 error-prone, and tedious business.  To expedite the process, a model
-called the “Optical Effects Compiler” is included with Fourmilab
+called the “Optical Effect Compiler” is included with Fourmilab
 Fireworks.  This is a pyramid-shaped object that contains a script
 defining a particle effect in Linden Scripting Language.  When the
 script is reset, it displays the Optical statements which define the
@@ -385,9 +408,11 @@ effect for Fourmilab Fireworks.  Touching the compiler pyramid toggles
 the particle effect on and off, allowing you to preview it and, by
 editing the script, adjust it to your satisfaction before copying the
 Optical statements into the Fireworks configuration notecard.  The
-Optical Effects Compiler makes it easy to convert particle effects
+Optical Effect Compiler makes it easy to convert particle effects
 you've found in script libraries into Optical declarations for the
-fireworks launcher.
+fireworks launcher.  The Compiler is supplied with definitions of a
+variety of particle systems you may use as starting points for your own
+experiments.
 
 CONFIGURATION NOTECARD
 
@@ -413,7 +438,7 @@ with five fireworks shells installed.  If you'd like to have more
 shells available for grand displays, you can add them with the
 following procedure.  Locate the object named “Fireworks Shell n” in
 the Fourmilab Fireworks folder and rez a copy into existence somewhere
-nearby the launcher.  Once the shell appears (it is a small white
+near the launcher.  Once the shell appears (it is a small white
 sphere), edit it and change its name to the next shell number: if
 you're adding shell 6 to a launcher with the standard 5, you'd name it
 “Fireworks Shell 6”.  Move the shell so it's inside the launcher, then
@@ -422,11 +447,11 @@ the shell and it.  Now press the Link button to add the shell as a link
 of the launcher.  Finally, restart the launcher with the Boot command
 so it will find the new shell.  You can add as many shells as you wish
 in this manner, bearing in mind that each shell you add increases the
-land impact of the launcher by 1.  If don't need five shells and wish
-to reduce land impact, edit the launcher, check the “Edit linked” box,
-press Ctrl and comma to advance to the highest numbered shell, press
-Unlink, drag it from the launcher and delete it. Then use the Boot
-command so the launcher forgets it.
+land impact of the launcher by 1.  If you don't need five shells and
+wish to reduce land impact, edit the launcher, check the “Edit linked”
+box, press Ctrl and comma to advance to the highest numbered shell,
+press Unlink, drag it from the launcher and delete it. Then use the
+Boot command so the launcher forgets it.
 
 PERMISSIONS AND THE DEVELOPMENT KIT
 

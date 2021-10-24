@@ -24,8 +24,8 @@
     float elevMax = PI_BY_TWO;      // Maximum elevation
     float aziMin = 0;               // Minimum azimuth
     float aziMax = TWO_PI;          // Maximum azimuth
-    float radMin = 1.5;             // Minimum radius
-    float radMax = 3;               // Maximum radius
+    float radMin = 2;               // Minimum radius
+    float radMax = 5;               // Maximum radius
     float intervMin = 0.75;         // Minimum interval
     float intervMax = 2.5;          // Maximum interval
 
@@ -40,6 +40,7 @@
 
     integer lTop;                   // Hat top link number
     vector pTop;                    // Hat top local position
+    integer lBrim;                  // Hat brim link number
     list aShells;                   // Available (ready to launch) shells
     integer nShells;                // Number of firework shells
 
@@ -49,6 +50,7 @@
     integer DTYPE_OPTICAL = 1;          // Optical effect
     integer DTYPE_SOUND = 2;            // Sound clip
     integer DTYPE_GROUP = 3;            // Group
+    integer DTYPE_URL = 4;              // Web URL
     list dictvalues;                // Dictionary entry values
 
     //  Link messages
@@ -76,6 +78,7 @@
     integer LM_FS_PLAY = 93;            // Play sound clip
     integer LM_FS_LEGEND = 94;          // Update floating text legend
     integer LM_FS_STAT = 95;            // Display status
+    integer LM_FS_MEDIA = 96;           // Control media playback
 
     //  tawk  --  Send a message to the interacting user in chat
 
@@ -462,7 +465,6 @@
         //  Audio sound1[=UUID] sound2...     Define sound clips
 
         } else if (abbrP(command, "au")) {
-
             integer i;
 
             for (i = 1; i < argn; i++) {
@@ -515,7 +517,17 @@
         } else if (abbrP(command, "cl")) {
             tawk("\n\n\n\n\n\n\n\n\n\n\n\n\n");
 
-        //  Echo text                   Send text to sender
+        //  Delete name             Delete name from dictionary
+
+        } else if (abbrP(command, "de")) {
+            integer di = dictLook(sparam);
+            if (di >= 0) {
+                integer dx = di * 2;
+                dictionary = llDeleteSubList(dictionary, dx, dx + 1);
+                dictvalues = llDeleteSubList(dictvalues, di, di);
+            }
+
+        //  Echo text               Send text to sender
 
         } else if (abbrP(command, "ec")) {
             integer dindex = llSubStringIndex(lmessage, command);
@@ -527,13 +539,23 @@
             }
             tawk(emsg);
 
+        //  Embed URL               Embed audio content from URL
+
+        } else if (abbrP(command, "em")) {
+            if (argn > 1) {
+                dictChoose(sparam);
+            } else {
+                dictValue = "";
+            }
+            llMessageLinked(lBrim, LM_FS_MEDIA, dictValue, whoDat);
+
         //  Group gname member1 member2...  Define a group of objects
 
         } else if (abbrP(command, "gr")) {
             return dictAdd(sparam, DTYPE_GROUP,
                 llList2Json(JSON_ARRAY, llList2List(args, 2, -1)));
 
-        //  Help                        Give help information
+        //  Help                    Give help information
 
         } else if (abbrP(command, "he")) {
             llGiveInventory(id, helpFileName);      // Give requester the User Guide notecard
@@ -616,8 +638,19 @@
         //  Play audio              Play an audio clip
 
         } else if (abbrP(command, "pl")) {
-            if (dictChoose(sparam) != "") {
-                 llMessageLinked(lTop, LM_FS_PLAY, dictValue, whoDat);
+            if (argn < 2) {
+                //  Stop sound if no argument
+                llMessageLinked(lTop, LM_FS_PLAY, "", whoDat);
+            } else {
+                string clipname = sparam;
+                string loopy = "";
+                if (llGetSubString(clipname, 0, 0) == "+") {
+                    clipname = llDeleteSubString(clipname, 0, 0);
+                    loopy = "+";
+                }
+                if (dictChoose(clipname) != "") {
+                     llMessageLinked(lTop, LM_FS_PLAY, loopy + dictValue, whoDat);
+                }
             }
 
         //  Salvo n                 Launch a salvo of n shots
@@ -714,7 +747,7 @@
                     return FALSE;
                 }
 
-        //  Status                                  Print status
+        //  Status                  Print status
 
         } else if (abbrP(command, "st")) {
             llMessageLinked(lTop, LM_FS_STAT, llList2CSV(
@@ -723,7 +756,20 @@
                   angleScale, nShells, intervMin, intervMax, trace, echo,
                   llList2CSV(dictionary) ]), whoDat);
 
-        //  Wait                                Wait for all shells to return
+        //  URL                     Declare URL for embedded audio
+
+        } else if (abbrP(command, "ur")) {
+            message = llStringTrim(message, STRING_TRIM);
+            integer n = llSubStringIndex(message, " ");
+            message = llStringTrim(llGetSubString(message, n + 1, -1), STRING_TRIM);
+            n = llSubStringIndex(message, " ");
+            message = llStringTrim(llGetSubString(message, n + 1, -1), STRING_TRIM);
+//tawk("URL " + sparam + "=(" + message + ")");
+            if (!dictAdd(sparam, DTYPE_URL, message)) {
+                return FALSE;
+            }
+
+        //  Wait                    Wait for all shells to return
 
         } else if (abbrP(command, "wa")) {
             if (llGetListLength(aShells) < nShells) {
@@ -764,6 +810,7 @@
 
             lTop = findLinkNumber("Hat Top");
             pTop = llList2Vector(llGetLinkPrimitiveParams(lTop, [ PRIM_POS_LOCAL ]), 0);
+            lBrim = findLinkNumber("Hat Brim");
 
             elevMin = PI / 4;               // Set minimum elevation to 45 degrees
 

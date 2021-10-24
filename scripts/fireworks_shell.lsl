@@ -139,14 +139,15 @@
         return o;
     }
 
-    //  reload  --  Return to mortar launcher, disappear
+    //  reload  --  Return to mortar launcher, reappear
 
     reload() {
         llParticleSystem([ ]);
-        llSetLinkPrimitiveParamsFast(LINK_THIS,
-            [ PRIM_POS_LOCAL, ZERO_VECTOR, PRIM_COLOR, ALL_SIDES, sColour, 0 ]);
+        llSetLinkPrimitiveParams(LINK_THIS,
+            [ PRIM_POS_LOCAL, ZERO_VECTOR ]);
         //  Notify launcher we're ready to launch again
         llMessageLinked(plink, LM_FS_IDLE, "", NULL_KEY);
+        llSetAlpha(1, ALL_SIDES);
         plink = 0;
     }
 
@@ -210,11 +211,10 @@
         if (lstate == 0) {
             //  0:  Start, perform launch actions
             llSetLinkPrimitiveParamsFast(LINK_THIS,
-                [ PRIM_COLOR, ALL_SIDES, sColour, 1,
-                  PRIM_GLOW, ALL_SIDES, 0.7,
+                [ PRIM_GLOW, ALL_SIDES, 0.7,
                   PRIM_POS_LOCAL, tgt * 0.1
                  ]);
-            //  Activate burst particle system
+            //  Activate launch particle system
             llLinkParticleSystem(plink, launchPS);
             //  Play launch sound, if any
             if (launchSound != NULL_KEY) {
@@ -229,19 +229,20 @@
             ntime = hangTime;
         } else if (lstate == 2) {
             //  2:  Burst, perform detonation actions
-            //  Play burst sound
-            if (burstSound != NULL_KEY) {
-                llPlaySound(burstSound, 10);
-            }
             //  Turn off glow and hide projectile
             llSetLinkPrimitiveParamsFast(LINK_THIS,
                 [ PRIM_COLOR, ALL_SIDES, sColour, 0, PRIM_GLOW, ALL_SIDES, 0 ]);
             //  Activate burst particle system
             llParticleSystem(explodePS);
+            //  Play burst sound
+            if (burstSound != NULL_KEY) {
+                llPlaySound(burstSound, 10);
+            }
             lstate = 3;
             ntime = burstTime;
         } else if (lstate == 3) {
-            llLinkParticleSystem(LINK_ROOT, [ ]);
+            //  3:  Reload, ready for next shot
+            llLinkParticleSystem(plink, [ ]);
             reload();
             lstate = 0;
             ntime = 0;

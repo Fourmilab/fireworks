@@ -213,4 +213,74 @@ of all status items a user is likely to wish to see.
 Performed initial Git commit of scripts, notecards, sounds, textures,
 marketplace description, and this log.
 
+Changed the default radius minimum and maximum to 2 and 5 metres
+respectively.
 
+Added a Delete command to remove an item of any kind from the
+dictionary.  This allows removing an Optical declaration so it may be
+replaced by a new one without having the items concatenated to the
+existing declaration.
+
+Added logic to the Optical Effect Compiler so that when the particle
+effect is previewed by touching the compiler it removes its texture
+and sets alpha to 0.2 so it won't interfere with the display of the
+effect (which has its origin at the centre of the object).  When you
+touch again to stop the effect, the original texture and alpha are
+restored.  The texture and alpha are reset at state_entry() to restore
+appearance if the object was reset while display a particle effect.
+
+Revised the management of transparency of firework shells.  Previously,
+they were transparent (invisible) while in the launcher, which meant
+that if the user wanted to remove and unlink them, they were difficult
+to select.  Now, whenever the shell is in the launcher it will be
+visible.  It becomes invisible at the moment it explodes in the air,
+remains invisible as it returns to the launcher, and then returns to
+visibility (albeit hidden inside the launcher).  This may occasionally
+not look as intended due to lag between the script running on the
+simulator and the viewer's rendering of things, but that was true
+before as well.
+
+2021 October 23
+
+Integrated mark-ups from RPOD into the User Guide.
+
+Began development of a media player capability.  Added a script to the
+Hat Brim prim which responds to a new LM_FS_MEDIA message by playing
+the media on its face 1 (Black edge).
+
+2021 October 24
+
+Completed implementation of the media player facility.  Streaming
+audio sources are declared with a URL command:
+    URL uname https://....
+The URL is taken as everything from the first to the last nonblank
+character following the source name and may include spaces or any
+other character and upper and lower case.  Declared URLs are stored
+in the dictionary and may appear in Groups.
+
+Embedded audio is played with:
+    Embed name
+where the name can either be an explicit URL or a group containing
+URLs, in which case one is chosen at random.  If the stream includes
+video content, as is the case for YouTube, it is hidden on the black
+edge of the brim of the hat.  An Embed command with no name stops any
+currently playing audio.
+
+As with so many things in Second Life, the embedded media facility
+leaves much to be desired.  There is no way to determine the length of
+the stream, nor even to detect whether it is still playing by polling a
+status.  When a stream ends, it remains attached to the prim until it
+is explicitly removed.  Performing an Embed command while one is
+already active just abruptly ends the playing source and jumps to the
+new one.  And starting a source takes several seconds for no apparent
+reason.  Still, if you're looking to play audio more than ten seconds
+at a time (not to mention L$10 to upload each ten seconds), this is all
+you've got.
+
+Here are some media files you can test with:
+    Penguins
+        /1749 embed https://www.youtube.com/embed/IAuKHcshJqw?autoplay=1
+    New Horizons
+        /1749 embed https://www.youtube.com/embed/HK4Jzkx-o3I?autoplay=1
+    Overthinking
+        /1749 embed https://www.youtube.com/embed/1MmyJT-eDmI?autoplay=1
