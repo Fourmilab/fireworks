@@ -17,10 +17,15 @@
 
     float angleScale;                   // Angle scale factor
 
+    integer isOpen= FALSE;              // Is top open ?
+    key sitter;                         // UUID of avatar sitting
+
     //  Firework shell messages
     integer LM_FS_PLAY = 93;            // Play sound clip
     integer LM_FS_LEGEND = 94;          // Update floating text legend
     integer LM_FS_STAT = 95;            // Display status
+    integer LM_FS_OPEN = 97;            // Change top open status
+
 
     //  Snoop on Script Processor messages for housekeeping
     integer LM_SP_STAT = 52;            // Print status
@@ -168,9 +173,9 @@
         }
 
         state_entry() {
+            llLinkSitTarget(LINK_THIS, llGetLocalPos() + <0.25, 0, 0.25>, ZERO_ROTATION);
             whoDat = owner = llGetOwner();
         }
-
 
         /*  The link_message() event receives commands from other scripts
             script and passes them on to the script processing functions
@@ -184,7 +189,16 @@
             //  LM_FS_PLAY (92): Play sound clip
 
             if (num == LM_FS_PLAY) {
-                llPlaySound(str, 10);
+                if (str == "") {
+                    llStopSound();
+                } else {
+                    if (llGetSubString(str, 0, 0) == "+") {
+                        str = llDeleteSubString(str, 0, 0);
+                        llLoopSound(str, 10);
+                    } else {
+                        llPlaySound(str, 10);
+                    }
+                }
 
             //  LM_FS_LEGEND (94): Update floating text legend
 
@@ -200,7 +214,6 @@
                     string message = llGetSubString(str, cp + 1, -1);
                     string lmessage = fixArgs(llToLower(message));
                     list args = llParseString2List(lmessage, [ " " ], []);
-                    integer argn = llGetListLength(args);
                     string sparam = llList2String(args, 1);
                     string ltext = inventoryName("le", lmessage, message);
                     vector colour = <0, 1, 0>;      // Default colour
@@ -217,10 +230,9 @@
                     llSetText(ltext, colour, 1);
                 }
 
-            //  LM_FS_STAT (95): Update floating text legend
+            //  LM_FS_STAT (95): Display auxiliary script status
 
             } else if (num == LM_FS_STAT) {
-//tawk(str);
                 list sta = llCSV2List(str);
                 angleScale = llList2Float(sta, 9);
                 integer mFree = llList2Integer(sta, 0);
@@ -257,6 +269,31 @@
 
                 //  Request status of Script Processor and Fireworks Shells
                 llMessageLinked(LINK_SET, LM_SP_STAT, "", id);
+
+            //  LM_FS_OPEN (97): Change top open status
+
+            } else if (num == LM_FS_OPEN) {
+                isOpen = (integer) str;
+                //  If avatar seated, kick 'em off amd admminister a swift push
+                if ((sitter != NULL_KEY) && isOpen) {
+                    llUnSit(sitter);
+                    llPushObject(sitter, <0, 0, 25>, ZERO_VECTOR, TRUE);
+                }
+            }
+        }
+
+        //  changed  --  Handle avatar sitting or departing
+
+        changed(integer change) {
+            sitter = llAvatarOnLinkSitTarget(LINK_THIS);
+            if (change & CHANGED_LINK) {
+                if (sitter != NULL_KEY) {
+                    //  Avatar has sat on the object
+                    if (isOpen) {
+                        //  If top is open, don't allow sit on object
+                        llUnSit(sitter);
+                    }
+               }
             }
         }
     }

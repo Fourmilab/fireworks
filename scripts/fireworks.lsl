@@ -79,6 +79,7 @@
     integer LM_FS_LEGEND = 94;          // Update floating text legend
     integer LM_FS_STAT = 95;            // Display status
     integer LM_FS_MEDIA = 96;           // Control media playback
+    integer LM_FS_OPEN = 97;            // Change top open status
 
     //  tawk  --  Send a message to the interacting user in chat
 
@@ -170,6 +171,7 @@
     //  tipTop  -- Tip the top of the hat
 
     tipTop(integer open) {
+        llMessageLinked(lTop, LM_FS_OPEN, (string) open, whoDat);
         if (open) {
             llSetLinkPrimitiveParamsFast(lTop,
                 [ PRIM_POS_LOCAL, pTop + <0, -0.1, 0.1>,

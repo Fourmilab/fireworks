@@ -284,3 +284,12 @@ Here are some media files you can test with:
         /1749 embed https://www.youtube.com/embed/HK4Jzkx-o3I?autoplay=1
     Overthinking
         /1749 embed https://www.youtube.com/embed/1MmyJT-eDmI?autoplay=1
+
+2021 October 25
+
+Added logic to the Fireworks Auxiliary script in Hat Top, with a little
+help from the main script, to inform it when the launcher opens and
+closes so that if an avatar is seated on the hat when it opens, they
+are kicked off and given a good push "to boot".  Further, any attempt
+to sit on the launcher while it's open will result in an immediate
+llUnSit().
