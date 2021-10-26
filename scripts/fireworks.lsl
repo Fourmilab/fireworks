@@ -38,9 +38,9 @@
     string configScript = "Script: Configuration";
     string helpFileName = "Fourmilab Fireworks User Guide";
 
-    integer lTop;                   // Hat top link number
-    vector pTop;                    // Hat top local position
-    integer lBrim;                  // Hat brim link number
+    integer lTop;                   // Fireworks top link number
+    vector pTop;                    // Fireworks top local position
+    integer lBrim;                  // Fireworks bottom link number
     list aShells;                   // Available (ready to launch) shells
     integer nShells;                // Number of firework shells
 
@@ -810,9 +810,9 @@
 
             whoDat = owner = llGetOwner();
 
-            lTop = findLinkNumber("Hat Top");
+            lTop = findLinkNumber("Fireworks Top");
             pTop = llList2Vector(llGetLinkPrimitiveParams(lTop, [ PRIM_POS_LOCAL ]), 0);
-            lBrim = findLinkNumber("Hat Brim");
+            lBrim = findLinkNumber("Fireworks Bottom");
 
             elevMin = PI / 4;               // Set minimum elevation to 45 degrees
 

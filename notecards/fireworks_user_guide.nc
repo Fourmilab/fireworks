@@ -12,10 +12,11 @@ intervals.  The optical effects (particle systems) displayed for
 firework bursts are defined in a configuration script and may be
 modified or added to by the owner.  Sound effects for firework launches
 and detonations are defined in the launcher's inventory and new effects
-can be added.  Multiple firework shells can be placed in the inventory,
-allowing as many simultaneous bursts as desired (each shell has a land
-impact of 1 prim).  The randomly chosen azimuth, elevation, and range
-of bursts can be set via chat or a notecard script.
+can be added.  Streaming audio from Web sites may be played to
+accompany the show.  Multiple firework shells can be placed in the
+inventory, allowing as many simultaneous bursts as desired (each shell
+has a land impact of 1 prim).  The randomly chosen azimuth, elevation,
+and range of bursts can be set via chat or a notecard script.
 
 WEARING THE FIREWORKS LAUNCHER
 
@@ -303,10 +304,21 @@ characters and are insensitive to upper and lower case.)
     Status
         Show status of the script, including settings and memory usage.
 
-    URL uname https://...
+    URL uname https://... [time]
         Declares the URL for a streaming audio source called uname.
-        You can then use uname in an Embed command or place it within
-        a Group of other audio sources.
+        You can then use uname in an Embed command or place it within a
+        Group of other audio sources. The running time of the audio to
+        be played is declared after the end of the URL, separated by a
+        space, within square brackets.  For example, a song which plays
+        for 2 minutes and 25.7 seconds would be specified as
+        “[2:25.7]”.  This declaration is used to “squelch” the audio
+        source at completion of play to avoid its being replayed if an
+        avatar leaves the vicinity of the launcher and subsequently
+        returns.  If you don't know the length of the audio (for
+        example, if it's a live stream or Internet radio station), omit
+        the time specification entirely.  It is then up to user or
+        notecard script to explicitly stop the audio at the appropriate
+        time with an Embed command specifying no URL.
 
     Wait
         Pause script execution until all launched fireworks have

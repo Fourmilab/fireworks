@@ -2,6 +2,8 @@ Fireworks launcher wearable as an avatar accessory or rezzed in-world
 
 Fully programmable: firework effects and sounds can be customised by owner
 
-Firework shows can be scripted and set to run at scheduled times
+Program custom burst effects, sound effects, embedded Web audio
 
-Full permissions: all objects and scripts are copy/modify/transfer
+Script shows with notecards, run shows on schedule
+
+Use any Second Life particle effect for bursts

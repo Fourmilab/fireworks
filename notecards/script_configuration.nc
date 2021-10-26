@@ -52,8 +52,9 @@ Group explode burst1 burst2 burst3 burst4 burst5 burst6 burst7 burst8
 #
 #   Media URLs
 #
-URL pingu https://www.youtube.com/embed/IAuKHcshJqw?autoplay=1
-URL horiz https://www.youtube.com/embed/HK4Jzkx-o3I?autoplay=1
-URL othink https://www.youtube.com/embed/1MmyJT-eDmI?autoplay=1
+URL pingu https://www.youtube.com/embed/IAuKHcshJqw?autoplay=1 [1:08]
+URL horiz https://www.youtube.com/embed/HK4Jzkx-o3I?autoplay=1 [2:16]
+URL othink https://www.youtube.com/embed/1MmyJT-eDmI?autoplay=1 [2:54]
 Group songs pingu horiz othink
-URL handel https://www.youtube.com/embed/XiTIfH0TpTg?autoplay=1
+URL handel https://www.youtube.com/embed/XiTIfH0TpTg?autoplay=1 [22:00]
+URL thunder https://www.youtube.com/embed/RhxmVbLSyo0?autoplay=1 [4]

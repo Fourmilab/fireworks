@@ -17,6 +17,10 @@
     key owner;                          // Owner UUID
     key whoDat = NULL_KEY;              // Avatar who sent command
     vector oColour;                     // Original media face colour
+    integer ticking;                    // Is timer running ?
+    float playLatency = 6;              // Latency before play starts, seconds
+    integer trace = FALSE;              // Trace operations ?
+    float timerStart;                   // Duration start time
 
     integer FACE_MEDIA = 1;             // Media player prim face
 
@@ -26,6 +30,34 @@
     //  Snoop on Script Processor messages for housekeeping
     integer LM_SP_RESET = 51;           // Reset script
     integer LM_SP_STAT = 52;            // Print status
+    integer LM_SP_SETTINGS = 59;        // Set operating modes
+
+    //  flLastSubStringIndex  --  Index of last occurrence of pattern in source
+
+    integer flLastSubStringIndex(string source, string pattern) {
+        integer ix;
+        integer lix = -1;
+        integer lpat = llStringLength(pattern);
+        while ((source != "") && ((ix = llSubStringIndex(source, pattern)) >= 0)) {
+            source = llDeleteSubString(source, 0, ix + lpat);
+            lix = ix;
+        }
+        return lix;
+    }
+
+    //  parseTime  --  Parse a time specification: HH:MM:SS.dddd
+
+    float parseTime(string s) {
+        float t = 0;
+        float factor = 1;
+        list l = llParseStringKeepNulls(s, [ ":" ], [ ]);
+        while (l != [ ]) {
+            t += llList2Float(l, -1) * factor;
+            factor *= 60;
+            l = llDeleteSubList(l, -1, -1);
+        }
+        return t;
+    }
 
     //  tawk  --  Send a message to the interacting user in chat
 
@@ -52,6 +84,11 @@
         integer stat = llClearLinkMedia(LINK_THIS, FACE_MEDIA);
         if (stat != STATUS_OK) {
             tawk("Error status " + (string) stat + " clearing media");
+        }
+        //  If squelch timer running, cancel it
+        if (ticking) {
+            ticking = FALSE;
+            llSetTimerEvent(0);
         }
         llSetColor(oColour, FACE_MEDIA);
     }
@@ -108,6 +145,12 @@
                 stat += "\n    Media: " + mstat;
                 tawk(stat);
 
+            //  LM_SP_SETTINGS (59): Set processing modes
+
+            } else if (num == LM_SP_SETTINGS) {
+                list args = llCSV2List(str);
+                trace = llList2Integer(args, 0);
+
             //  Firework Auxiliary messages
 
             //  LM_FS_MEDIA (96): Control media playback
@@ -116,20 +159,68 @@
                 if (str == "") {
                     resetMedia();
                 } else {
+                    if (llGetLinkMedia(LINK_THIS, FACE_MEDIA,
+                            [   PRIM_MEDIA_CURRENT_URL ]) != [ ]) {
+                        llClearLinkMedia(LINK_THIS, FACE_MEDIA);
+                        //  Have to wait for llClearLinkMedia() to propagate
+                        llSleep(0.1);
+                    }
+                    string s = str;
+                    integer tx = flLastSubStringIndex(s, " [");
+                    float trt = -1;
+                    if (tx >= 0) {
+                        s = llDeleteSubString(s, 0, tx + 1);
+                        if (llGetSubString(s, -1, -1) == "]") {
+                            s = llDeleteSubString(s, -1, -1);
+                            str = llStringTrim(llGetSubString(str, 0, tx - 1), STRING_TRIM);
+                            trt = parseTime(s);
+                        }
+                    }
+                    if (trace) {
+                        string slength = "unknown";
+                        if (trt > 0) {
+                            slength = (string) trt + " sec.";
+                        }
+                        tawk("Playing URL " + str + " Length: " + slength);
+                    }
+                    if (ticking) {
+                        ticking = FALSE;
+                        llSetTimerEvent(0);
+                    }
                     integer stat = llSetLinkMedia(LINK_THIS, FACE_MEDIA,
                         [   PRIM_MEDIA_CURRENT_URL, str,
                             PRIM_MEDIA_AUTO_PLAY, TRUE,
                             PRIM_MEDIA_CONTROLS, PRIM_MEDIA_CONTROLS_MINI,
                             PRIM_MEDIA_PERMS_CONTROL, PRIM_MEDIA_PERM_NONE,
                             PRIM_MEDIA_PERMS_INTERACT, PRIM_MEDIA_PERM_NONE,
-                            PRIM_MEDIA_WIDTH_PIXELS, 1,
-                            PRIM_MEDIA_HEIGHT_PIXELS, 1,
-                            PRIM_MEDIA_AUTO_SCALE, FALSE   ]
+                            PRIM_MEDIA_AUTO_SCALE, FALSE ]
                     );
                     if (stat != STATUS_OK) {
                         tawk("Error status " + (string) stat + " playing URL " +
                             str);
+                    } else {
+                        if (trt > 0) {
+                            if (trace) {
+                                tawk("Setting timer: " +
+                                     (string) (trt + playLatency));
+                                timerStart = llGetTime();
+                            }
+                            llSetTimerEvent(trt + playLatency);
+                            ticking = TRUE;
+                        }
                     }
+                }
+            }
+        }
+
+        timer() {
+            if (ticking) {
+                ticking = FALSE;
+                llSetTimerEvent(0);
+                llClearLinkMedia(LINK_THIS, FACE_MEDIA);
+                if (trace) {
+                    tawk("Squelch after " +
+                        (string) (llGetTime() - timerStart) + " seconds.");
                 }
             }
         }

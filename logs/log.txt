@@ -277,19 +277,97 @@ reason.  Still, if you're looking to play audio more than ten seconds
 at a time (not to mention L$10 to upload each ten seconds), this is all
 you've got.
 
-Here are some media files you can test with:
-    Penguins
-        /1749 embed https://www.youtube.com/embed/IAuKHcshJqw?autoplay=1
-    New Horizons
-        /1749 embed https://www.youtube.com/embed/HK4Jzkx-o3I?autoplay=1
-    Overthinking
-        /1749 embed https://www.youtube.com/embed/1MmyJT-eDmI?autoplay=1
-
 2021 October 25
 
 Added logic to the Fireworks Auxiliary script in Hat Top, with a little
 help from the main script, to inform it when the launcher opens and
-closes so that if an avatar is seated on the hat when it opens, they
-are kicked off and given a good push "to boot".  Further, any attempt
-to sit on the launcher while it's open will result in an immediate
-llUnSit().
+closes so that if an avatar is seated on the launcher when it opens,
+they are kicked off and given a good push "to boot".  Further, any
+attempt to sit on the launcher while it's open will result in an
+immediate llUnSit().  The "Set top" command now sends a LM_FS_OPEN
+message when the state of the top changes, allowing the auxiliary
+script to know how it should behave.
+
+Renamed the top prim "Fireworks Top" and the bottom "Fireworks Bottom"
+so chat messages originating from them are better identified.
+
+Cleared out media accidentally set on the wrong face of the bottom
+prim, which caused it to start playing every time the owner entered
+the region.
+
+The "media on a prim" feature, activated by llSetLinkMedia(), is as
+eccentric as you'd expect for Second Life.  First of all, unless you go
+to the Firestorm Avatar/Preferences/Sound & Media/Media tab and set
+Media auto-play to Enabled, you'll not hear media which is started by
+another avatar or by yourself.
+
+Second, at least with Firestorm, the sound that plays comes from a
+hacked Web browser built into the viewer and is not muted when you
+mute the viewer's audio output.  I don't know whether the media audio
+can be muted or how to do it.
+
+Third, if multiple avatars are near the object and one activates the
+media, they will hear it start playing up to several seconds apart,
+when their respective viewers get around to it.  So, forget about
+trying to closely synchronise media audio with actions in-world.
+
+Fourth, if you've played a media source and you try to replay it with
+a subsequent call on llSetLinkMedia(), nothing will happen because the
+parameters are the same.  To do this, have to llClearLinkMedia() to
+clear out the parameters, then start the media you're replaying.  But
+if you call the clear and then immediately set, that doesn't work,
+presumably because some asynchronous process hasn't processed the clear
+before the next set comes along, thinks it is a duplicate, and ignores
+it.  You need a timed delay between the clear and the next set.  By
+experimentation I determined than 0.1 second works and than 0.01 second
+is unreliable (I've seen one avatar hear the replay and another not).
+
+Fifth, if you have set media on a prim and an avatar has heard it play
+to conclusion, but it remains set and the avatar then teleports away
+(even within the same region) and subsequently returns (either by
+teleporting or moving within the region) to the vicinity of the object,
+the media will play again from the beginning.  Thus, the "media on a
+prim" feature should not be thought of as an event which occurs
+in-world, but rather an interaction between a property of the prim face
+and an avatar, which triggers the viewer's playing the media attached
+to the face when the avatar comes within range.  When the avatar leaves
+(you do not even need to leave the region or teleport: just get far
+enough away and then return within range) the viewer seems to forget
+that the media has been played (presumably when the object containing
+it goes out of render range), and then it plays again as you approach
+the object.
+
+To deal with all of this, I took the following steps.  The most
+significant is the ability to declare running time on the URL
+statement. The running time is appended to the URL with a
+space-separated time expressed as [HH:MM:SS], for example:
+    URL pingu https://www.youtube.com/embed/IAuKHcshJqw?autoplay=1 [1:08]
+for a clip that plays for one minute and eight seconds.  Since the URL
+command stores the entire nonblank string that follows the name, it
+needs to special code to handle these specifications.  When the Media
+Player receives such a URL, it detects the presence of the time
+specification, removes it from the URL, parses it and saves the running
+time of the clip, in seconds.  The time specification is then used to
+start a timer which, upon expiry, does a llClearLinkMedia() to remove
+the media from the prim and keep it from replaying if the user leaves
+and returns or another avatar arrives.  This, of course, requires
+another sloppy, rubbery, ad hoc hack because the clip does not actually
+start to play for several seconds after it is attached to the prim, so
+a timer set to the actual duration of the clip will result in it bring
+truncated at the end.  I put in an experimentally determined latency
+correction set at present to 6 seconds and called playLatency which is
+added to the run time when computing the time before the clip is
+cleared.  You know we're going to eventually have to make this
+settable, don't you, and that even then some people are going to be
+unhappy with it, right?
+
+To deal with restarting clips, I added code which, when a new embed is
+started, checks if an embed is already on the player prim (in other
+words, has been started and not cleared by the timer).  If so, it is
+cleared and the required delay (0.1 second) taken before starting the
+new clip.
+
+2021 October 26
+
+Made the output logging the start of embedded media and the operation
+of the squelch timer conditional on "Set trace on" in the main script.
