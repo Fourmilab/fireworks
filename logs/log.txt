@@ -371,3 +371,52 @@ new clip.
 
 Made the output logging the start of embedded media and the operation
 of the squelch timer conditional on "Set trace on" in the main script.
+
+To work around the unwanted automatic looping of MP3 files, I wrote
+an auxiliary media player Web utility, which is presently installed
+at Fourmilab.  You use it with a URL like (this is not the actual
+URL, as I have yet decided whether, where, and how to host it):
+    "https://www.fourmilab.ch/somewhere/mpt.html?v=https://example.com/mp3s/song.mp3&autoplay"
+where you can specify any other attributes for an HTML5 <audio> tag
+you wish after the URL name.  If you don't specify "autoplay", the
+audio will not play, however, so don't forget it.  This will work for
+any kind of media the viewer's built-in browser understands.  So far
+I have tested it with:
+    .mp3
+    .webm
+    .ogg
+If the media source contains video, it will be ignored and only the
+audio will be sent.  There does not appear to be any cross-site
+content problems: I can play an MP3 file from archive.org via the
+player at Fourmilab.
+
+In Firestorm, if you display the Developer/Consoles/Debug Console you
+will see log information as its media player progresses.  When you
+try to play an unsupported media format, it will report an HTTP timeout
+error.
+
+2021 October 30
+
+Captured video for the YouTube description.  The "gtk-recordmydesktop"
+program we've been using up to now is not supported on Xubuntu 20.04,
+so I installed "vokoscreenNG".  It has a different means of specifying
+the window to be captured, and it mis-estimates the window boundary,
+so it actually chops off the bottom of the window and captures its own
+top border marker and beyond that.  You'll have to scale and shift the
+clips OpenShot to compensate.
+
+2021 October 31
+
+Produced the YouTube video:
+    https://www.youtube.com/watch?v=bzBMy3w8WMU
+The total running time is 5:10.
+
+2021 November 1
+
+Added chapter marks to the YouTube video.  Here are the instructions:
+    https://support.google.com/youtube/answer/9884579?hl=en-GB
+
+Added the YouTube video to the Marketplace listing.
+
+Added a link to the YouTube video to the README.md file for the
+repository.
