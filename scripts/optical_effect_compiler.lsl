@@ -19,109 +19,167 @@
     /*  The particle system definition function should
         store the name and the list defining the particle
         system into the following two variables.  */
+
     string psname;
     list psys;
 
+    vector lastHSV;
+
     integer toggle = FALSE;             // Touch toggle
 
-    splodey() {
-        psname = "splodey";
+    //  Flames burning upward
+    fireplace() {
+        psname = "fireplace";
         psys = [
-                PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE,
-                PSYS_SRC_BURST_RADIUS, 0.2,
-                PSYS_PART_START_COLOR, <1, 0, 1>,
-                PSYS_PART_END_COLOR, <0.2, 0.2, 0.2>,
-                PSYS_PART_START_SCALE, <0.3, 0.3, 0>,
-                PSYS_PART_END_SCALE, <0.1, 0.1, 0>,
-                PSYS_PART_START_GLOW, 0.2,
-                PSYS_PART_END_GLOW, 0,
-                PSYS_SRC_MAX_AGE, 0.2,
-                PSYS_PART_MAX_AGE, 0.75,
-                PSYS_SRC_BURST_RATE, 20,
-                PSYS_SRC_BURST_PART_COUNT, 1000,
-                PSYS_SRC_ACCEL, <0, 0, 0>,
-                PSYS_SRC_BURST_SPEED_MIN, 2,
-                PSYS_SRC_BURST_SPEED_MAX, 2,
-                PSYS_PART_FLAGS, PSYS_PART_EMISSIVE_MASK |
-                                 PSYS_PART_FOLLOW_VELOCITY_MASK |
-                                 PSYS_PART_INTERP_SCALE_MASK |
-                                 PSYS_PART_INTERP_COLOR_MASK
-               ];
-    }
-
-    snow() {
-        psname = "snow";                // Name of particle system
-        psys = [
-                // Define the particle system here
-                PSYS_PART_FLAGS, 0,
-                PSYS_PART_START_COLOR, <3.10000, 2.30000, 1.70000>,
-                PSYS_PART_END_COLOR, <-0.10000, -0.60000, -1.70000>,
-                PSYS_PART_START_SCALE, <0.050000, 0.05000, 0.00000>,
-                PSYS_PART_END_SCALE, <0.00000, 0.00000, 0.00000>,
-                PSYS_SRC_PATTERN, 8,
-                PSYS_SRC_BURST_RATE, 0.000000,
-                PSYS_SRC_ACCEL, <0.00000, 0.00000, -0.40000>,
-                PSYS_SRC_BURST_PART_COUNT, 10,                  // increase for more snow
-                PSYS_SRC_BURST_RADIUS, 0.000000,
-                PSYS_SRC_BURST_SPEED_MIN, 0.000000,
-                PSYS_SRC_BURST_SPEED_MAX, 0.300000,             // increase for longer distance
-                PSYS_SRC_TARGET_KEY, NULL_KEY,
-                PSYS_SRC_ANGLE_BEGIN, 3.141593,
-                PSYS_SRC_ANGLE_END, 6.283185,
-                PSYS_SRC_OMEGA, <0.00000, 0.10000, 0.00000>,
-                PSYS_SRC_MAX_AGE, 0.00000,
-                PSYS_SRC_TEXTURE, "99214e66-0e50-f8b8-142b-9a0b82a480a3",  // change this to any texture name that is also in the prim, or use the UUID. If you use the UUID and want to give it to others, make sure the texture in your inventory has copy on it.
-                PSYS_PART_START_ALPHA, 0.300000,                // increase for less transparent snow
-                PSYS_PART_END_ALPHA, 0.00000
+                PSYS_PART_FLAGS, 291,
+                PSYS_SRC_PATTERN, 2,
+                PSYS_PART_START_ALPHA, 1.00,
+                PSYS_PART_END_ALPHA, 0.00,
+                PSYS_PART_START_COLOR, <1.00,1.00,1.00>,
+                PSYS_PART_END_COLOR, <1.00,1.00,1.00>,
+                PSYS_PART_START_SCALE, <0.25,0.25,0.00>,
+                PSYS_PART_END_SCALE, <1.00,1.00,0.00>,
+                PSYS_PART_MAX_AGE, 0.80,
+                PSYS_SRC_MAX_AGE, 0.00,
+                PSYS_SRC_ACCEL, <0.00,0.00,2.00>,
+                PSYS_SRC_ANGLE_BEGIN, 0.00,
+                PSYS_SRC_ANGLE_END, 1.05,
+                PSYS_SRC_BURST_PART_COUNT, 5,
+                PSYS_SRC_BURST_RADIUS, 0.10,
+                PSYS_SRC_BURST_RATE, 0.00,
+                PSYS_SRC_BURST_SPEED_MIN, 0.00,
+                PSYS_SRC_BURST_SPEED_MAX, 0.40,
+                PSYS_SRC_OMEGA, <0.00,0.00,0.00>,
+                PSYS_SRC_TEXTURE, "a96ecd50-96e1-28b4-51ec-96b3112210c0"
         ];
     }
 
-    rain() {
-        psname = "rain";
-        psys = [PSYS_PART_MAX_AGE,1.20,
-                PSYS_PART_FLAGS, 259,
-                PSYS_PART_START_COLOR, <0.73, 0.84, 0.79>,
-                PSYS_PART_END_COLOR, <0.61, 0.76, 0.82>,
-                PSYS_PART_START_SCALE,<0.10, 0.00, 0.00>,
-                PSYS_PART_END_SCALE,<0.10, 3.69, 0.00>,
-                PSYS_SRC_PATTERN, 8,
-                PSYS_SRC_BURST_RATE,0.10,
-                PSYS_SRC_BURST_PART_COUNT,25,
-                PSYS_SRC_BURST_RADIUS,5.57,
-                PSYS_SRC_BURST_SPEED_MIN,0.11,
-                PSYS_SRC_BURST_SPEED_MAX,0.64,
-                PSYS_SRC_ANGLE_BEGIN, 0.00,
-                PSYS_SRC_ANGLE_END, 0.78,
-                PSYS_SRC_MAX_AGE, 0.0,
-                PSYS_SRC_TEXTURE, "06675bc5-e9b9-0557-7179-fbf7779faed8",
-                PSYS_PART_START_ALPHA, 0.20,
-                PSYS_PART_END_ALPHA, 0.75,
-                PSYS_SRC_ACCEL, <-0.37, 0.45, -12.00>];
-    }
-
-    smoke() {
-        psname = "fire";
-        psys = [PSYS_PART_MAX_AGE,2.50,
-                PSYS_PART_FLAGS, 259,
-                PSYS_PART_START_COLOR, <0.18, 0.16, 0.13>,
-                PSYS_PART_END_COLOR, <0.59, 0.65, 0.62>,
-                PSYS_PART_START_SCALE,<0.15, 0.15, 0.00>,
-                PSYS_PART_END_SCALE,<0.77, 1.21, 0.00>,
+    Xfireplace() {
+        psname = "fireplace";
+        psys = [
+                PSYS_PART_FLAGS, PSYS_PART_EMISSIVE_MASK |
+                                 PSYS_PART_FOLLOW_VELOCITY_MASK |
+                                 PSYS_PART_INTERP_SCALE_MASK |
+                                 PSYS_PART_INTERP_COLOR_MASK,
                 PSYS_SRC_PATTERN, 2,
-                PSYS_SRC_BURST_RATE,0.00,
-                PSYS_SRC_BURST_PART_COUNT,4,
-                PSYS_SRC_BURST_RADIUS,0.00,
-                PSYS_SRC_BURST_SPEED_MIN,0.07,
-                PSYS_SRC_BURST_SPEED_MAX,0.35,
-                PSYS_SRC_ANGLE_BEGIN, 1.65,
-                PSYS_SRC_ANGLE_END, 0.00,
-                PSYS_SRC_MAX_AGE, 0.0,
-                PSYS_SRC_TEXTURE, "006d9758-81da-38a9-9be3-b6c941cae931",
-                PSYS_PART_START_ALPHA, 0.40,
-                PSYS_PART_END_ALPHA, 0.00,
-                PSYS_SRC_ACCEL, <0.00, 0.00, 1.14>];
+                PSYS_PART_START_ALPHA, 1,
+                PSYS_PART_END_ALPHA, 0,
+                PSYS_PART_START_COLOR, <1, 1, 1>,
+                PSYS_PART_END_COLOR, <1, 1, 1>,
+                PSYS_PART_START_SCALE, <0.25, 0.25, 0>,
+                PSYS_PART_END_SCALE, <1, 1, 0>,
+                PSYS_PART_MAX_AGE, 0.8,
+                PSYS_SRC_MAX_AGE, 1.5,
+                PSYS_SRC_ACCEL, ZERO_VECTOR,
+                PSYS_SRC_ANGLE_BEGIN, 0,
+                PSYS_SRC_ANGLE_END, 1.05,
+                PSYS_SRC_BURST_PART_COUNT, 500,
+                PSYS_SRC_BURST_RADIUS, 0.1,
+                PSYS_SRC_BURST_RATE, 1,
+                PSYS_SRC_BURST_SPEED_MIN, 0,
+                PSYS_SRC_BURST_SPEED_MAX, 1.5,
+                PSYS_SRC_OMEGA, ZERO_VECTOR,
+                PSYS_SRC_TEXTURE, "a96ecd50-96e1-28b4-51ec-96b3112210c0"
+        ];
     }
 
+    //  Firework burst, spherical expansion
+    firework() {
+        psname = "firework";
+        psys = [
+                 PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE,
+
+                 PSYS_SRC_MAX_AGE, 0.,
+                 PSYS_PART_MAX_AGE, 9.,
+
+                 PSYS_SRC_BURST_RATE, 20.,
+                 PSYS_SRC_BURST_PART_COUNT, 500,
+
+                 PSYS_SRC_BURST_RADIUS, .1,
+                 PSYS_SRC_BURST_SPEED_MIN, 3.,
+                 PSYS_SRC_BURST_SPEED_MAX, 3.,
+                 PSYS_SRC_ACCEL, <0.0,0.0,-0.8>,
+
+                 PSYS_PART_START_COLOR, <246,38,9>/255.,
+                 PSYS_PART_END_COLOR, <246,38,9>/255,
+
+                 PSYS_PART_START_ALPHA, 0.9,
+                 PSYS_PART_END_ALPHA, 0.0,
+
+                 PSYS_PART_START_SCALE, <.3,.3,0>,
+                 PSYS_PART_END_SCALE, <.1,.1,0>,
+
+                 PSYS_PART_FLAGS
+                 , 0
+                 | PSYS_PART_EMISSIVE_MASK
+                 | PSYS_PART_INTERP_COLOR_MASK
+                 | PSYS_PART_INTERP_SCALE_MASK
+                 | PSYS_PART_FOLLOW_VELOCITY_MASK
+                 //| PSYS_PART_WIND_MASK
+        ];
+    }
+
+    Xfirework() {
+        psname = "firework";
+        psys = [
+                 PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE,
+
+                 PSYS_SRC_MAX_AGE, 0.,
+                 PSYS_PART_MAX_AGE, 9.,
+
+                 PSYS_SRC_BURST_RATE, 20.,
+                 PSYS_SRC_BURST_PART_COUNT, 500,
+
+                 PSYS_SRC_BURST_RADIUS, .1,
+                 PSYS_SRC_BURST_SPEED_MIN, 3.,
+                 PSYS_SRC_BURST_SPEED_MAX, 3.,
+                 PSYS_SRC_ACCEL, <0.0,0.0,-0.8>,
+
+                 PSYS_PART_START_COLOR, <246,38,9>/255.,
+                 PSYS_PART_END_COLOR, <246,38,9>/255,
+
+                 PSYS_PART_START_ALPHA, 0.9,
+                 PSYS_PART_END_ALPHA, 0.0,
+
+                 PSYS_PART_START_SCALE, <.3,.3,0>,
+                 PSYS_PART_END_SCALE, <.1,.1,0>,
+
+                 PSYS_PART_FLAGS
+                 , 0
+                 | PSYS_PART_EMISSIVE_MASK
+                 | PSYS_PART_INTERP_COLOR_MASK
+                 | PSYS_PART_INTERP_SCALE_MASK
+                 | PSYS_PART_FOLLOW_VELOCITY_MASK
+                 //| PSYS_PART_WIND_MASK
+        ];
+    }
+
+    //  Spiral ejection of crystals, which rise upward
+
+    fwspiral() {
+        psname = "fwspiral";
+        psys = [
+                PSYS_PART_FLAGS, PSYS_PART_INTERP_COLOR_MASK |
+                                 PSYS_PART_EMISSIVE_MASK |
+                                 PSYS_PART_FOLLOW_VELOCITY_MASK ,
+                PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_ANGLE,
+                PSYS_PART_MAX_AGE, 5.0,
+                PSYS_SRC_BURST_SPEED_MIN, 1.0,
+                PSYS_SRC_BURST_SPEED_MAX, 2.0,
+                PSYS_SRC_ACCEL, <0,0,0.2>,
+                PSYS_SRC_BURST_RATE, 0.05,
+                PSYS_SRC_BURST_PART_COUNT, 10,
+                PSYS_SRC_ANGLE_BEGIN,  0*DEG_TO_RAD,
+                PSYS_SRC_ANGLE_END, 90*DEG_TO_RAD,
+                PSYS_SRC_OMEGA, <0,0,20>,
+                PSYS_PART_START_SCALE, <0.25, 0.25, 0.0>,
+                PSYS_PART_START_ALPHA, 1.0,
+                PSYS_PART_END_ALPHA,   0.5,
+                PSYS_SRC_TEXTURE, "181c6b1d-c2d0-70ba-bbf2-52ccc31687c6"
+        ];
+    }
+
+    //  Blood gushing upward
     gushBlood() {
         psname = "gushblood";
         // MASK FLAGS: set  to "TRUE" to enable
@@ -199,6 +257,83 @@
         ];
     }
 
+    //  Rain falling down from above
+    rain() {
+        psname = "rain";
+        psys = [PSYS_PART_MAX_AGE,1.20,
+                PSYS_PART_FLAGS, 259,
+                PSYS_PART_START_COLOR, <0.73, 0.84, 0.79>,
+                PSYS_PART_END_COLOR, <0.61, 0.76, 0.82>,
+                PSYS_PART_START_SCALE,<0.10, 0.00, 0.00>,
+                PSYS_PART_END_SCALE,<0.10, 3.69, 0.00>,
+                PSYS_SRC_PATTERN, 8,
+                PSYS_SRC_BURST_RATE,0.10,
+                PSYS_SRC_BURST_PART_COUNT,25,
+                PSYS_SRC_BURST_RADIUS,5.57,
+                PSYS_SRC_BURST_SPEED_MIN,0.11,
+                PSYS_SRC_BURST_SPEED_MAX,0.64,
+                PSYS_SRC_ANGLE_BEGIN, 0.00,
+                PSYS_SRC_ANGLE_END, 0.78,
+                PSYS_SRC_MAX_AGE, 0.0,
+                PSYS_SRC_TEXTURE, "06675bc5-e9b9-0557-7179-fbf7779faed8",
+                PSYS_PART_START_ALPHA, 0.20,
+                PSYS_PART_END_ALPHA, 0.75,
+                PSYS_SRC_ACCEL, <-0.37, 0.45, -12.00>];
+    }
+
+    //  Dark smoke rising from a fire
+    smoke() {
+        psname = "smoke";
+        psys = [PSYS_PART_MAX_AGE,2.50,
+                PSYS_PART_FLAGS, 259,
+                PSYS_PART_START_COLOR, <0.18, 0.16, 0.13>,
+                PSYS_PART_END_COLOR, <0.59, 0.65, 0.62>,
+                PSYS_PART_START_SCALE,<0.15, 0.15, 0.00>,
+                PSYS_PART_END_SCALE,<0.77, 1.21, 0.00>,
+                PSYS_SRC_PATTERN, 2,
+                PSYS_SRC_BURST_RATE,0.00,
+                PSYS_SRC_BURST_PART_COUNT,4,
+                PSYS_SRC_BURST_RADIUS,0.00,
+                PSYS_SRC_BURST_SPEED_MIN,0.07,
+                PSYS_SRC_BURST_SPEED_MAX,0.35,
+                PSYS_SRC_ANGLE_BEGIN, 1.65,
+                PSYS_SRC_ANGLE_END, 0.00,
+                PSYS_SRC_MAX_AGE, 0.0,
+                PSYS_SRC_TEXTURE, "006d9758-81da-38a9-9be3-b6c941cae931",
+                PSYS_PART_START_ALPHA, 0.40,
+                PSYS_PART_END_ALPHA, 0.00,
+                PSYS_SRC_ACCEL, <0.00, 0.00, 1.14>];
+    }
+
+    //  Snowflakes falling from the particle source
+    snow() {
+        psname = "snow";                // Name of particle system
+        psys = [
+                // Define the particle system here
+                PSYS_PART_FLAGS, 0,
+                PSYS_PART_START_COLOR, <3.10000, 2.30000, 1.70000>,
+                PSYS_PART_END_COLOR, <-0.10000, -0.60000, -1.70000>,
+                PSYS_PART_START_SCALE, <0.050000, 0.05000, 0.00000>,
+                PSYS_PART_END_SCALE, <0.00000, 0.00000, 0.00000>,
+                PSYS_SRC_PATTERN, 8,
+                PSYS_SRC_BURST_RATE, 0.000000,
+                PSYS_SRC_ACCEL, <0.00000, 0.00000, -0.40000>,
+                PSYS_SRC_BURST_PART_COUNT, 10,                  // increase for more snow
+                PSYS_SRC_BURST_RADIUS, 0.000000,
+                PSYS_SRC_BURST_SPEED_MIN, 0.000000,
+                PSYS_SRC_BURST_SPEED_MAX, 0.300000,             // increase for longer distance
+                PSYS_SRC_TARGET_KEY, llGetKey(),
+                PSYS_SRC_ANGLE_BEGIN, 3.141593,
+                PSYS_SRC_ANGLE_END, 6.283185,
+                PSYS_SRC_OMEGA, <0.00000, 0.10000, 0.00000>,
+                PSYS_SRC_MAX_AGE, 0.00000,
+                PSYS_SRC_TEXTURE, "99214e66-0e50-f8b8-142b-9a0b82a480a3",  // change this to any texture name that is also in the prim, or use the UUID. If you use the UUID and want to give it to others, make sure the texture in your inventory has copy on it.
+                PSYS_PART_START_ALPHA, 0.300000,                // increase for less transparent snow
+                PSYS_PART_END_ALPHA, 0.00000
+        ];
+    }
+
+    //  Sparks emitted from a source: standard "sparkler" Optical
     sparkler() {
         psname = "sparkler";
         psys = [
@@ -234,91 +369,93 @@
         ];
     }
 
-    firework() {
-        psname = "firework";
+    Xsparkler() {
+        psname = "sparkler";
         psys = [
                  PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE,
 
-                 PSYS_SRC_MAX_AGE, 0.,
-                 PSYS_PART_MAX_AGE, 9.,
+                 PSYS_SRC_MAX_AGE, 1.5,
+                 PSYS_PART_MAX_AGE, 5,
 
-                 PSYS_SRC_BURST_RATE, 20.,
-                 PSYS_SRC_BURST_PART_COUNT, 500,
+                 PSYS_SRC_BURST_RATE, 0,
+                 PSYS_SRC_BURST_PART_COUNT, 4500,
 
-                 PSYS_SRC_BURST_RADIUS, .1,
-                 PSYS_SRC_BURST_SPEED_MIN, 3.,
-                 PSYS_SRC_BURST_SPEED_MAX, 3.,
-                 PSYS_SRC_ACCEL, <0.0,0.0,-0.8>,
+                 PSYS_SRC_BURST_RADIUS, 3,
+                 PSYS_SRC_BURST_SPEED_MIN, 0.1,
+                 PSYS_SRC_BURST_SPEED_MAX, 3,
+                 PSYS_SRC_ACCEL, <0, 0, 0>,
 
-                 PSYS_PART_START_COLOR, <246,38,9>/255.,
-                 PSYS_PART_END_COLOR, <246,38,9>/255,
+                 PSYS_PART_START_COLOR, <-1, 1, 1>,
+                 PSYS_PART_END_COLOR, <-2, 1, 0>,
 
-                 PSYS_PART_START_ALPHA, 0.9,
-                 PSYS_PART_END_ALPHA, 0.0,
+                 PSYS_PART_START_ALPHA, 1,
+                 PSYS_PART_END_ALPHA, 0.5,
 
-                 PSYS_PART_START_SCALE, <.3,.3,0>,
-                 PSYS_PART_END_SCALE, <.1,.1,0>,
+                 PSYS_PART_START_SCALE, <0.15, 0.15, 0>,
+                 PSYS_PART_END_SCALE, <0.01, 0.01, 0>,
 
                  PSYS_PART_FLAGS
                  , 0
                  | PSYS_PART_EMISSIVE_MASK
                  | PSYS_PART_INTERP_COLOR_MASK
                  | PSYS_PART_INTERP_SCALE_MASK
+                 | PSYS_PART_FOLLOW_SRC_MASK
                  | PSYS_PART_FOLLOW_VELOCITY_MASK
-                 //| PSYS_PART_WIND_MASK
         ];
-
     }
 
-    fireplace() {
-        psname = "fireplace";
+    //  This is the splodey Optical from the standard Configuration notecard
+    splodey() {
+        psname = "splodey";
         psys = [
-                PSYS_PART_FLAGS, 291,
-                PSYS_SRC_PATTERN, 2,
-                PSYS_PART_START_ALPHA, 1.00,
-                PSYS_PART_END_ALPHA, 0.00,
-                PSYS_PART_START_COLOR, <1.00,1.00,1.00>,
-                PSYS_PART_END_COLOR, <1.00,1.00,1.00>,
-                PSYS_PART_START_SCALE, <0.25,0.25,0.00>,
-                PSYS_PART_END_SCALE, <1.00,1.00,0.00>,
-                PSYS_PART_MAX_AGE, 0.80,
-                PSYS_SRC_MAX_AGE, 0.00,
-                PSYS_SRC_ACCEL, <0.00,0.00,2.00>,
-                PSYS_SRC_ANGLE_BEGIN, 0.00,
-                PSYS_SRC_ANGLE_END, 1.05,
-                PSYS_SRC_BURST_PART_COUNT, 5,
-                PSYS_SRC_BURST_RADIUS, 0.10,
-                PSYS_SRC_BURST_RATE, 0.00,
-                PSYS_SRC_BURST_SPEED_MIN, 0.00,
-                PSYS_SRC_BURST_SPEED_MAX, 0.40,
-                PSYS_SRC_OMEGA, <0.00,0.00,0.00>,
-                PSYS_SRC_TEXTURE, "a96ecd50-96e1-28b4-51ec-96b3112210c0"
-        ];
+                PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE,
+                PSYS_SRC_BURST_RADIUS, 0.2,
+                PSYS_PART_START_COLOR, <1, 0, 1>,       // Change psc to <-1,1,1> for production
+                PSYS_PART_END_COLOR, <0.2, 0.2, 0.2>,   // Change pec to <-2,1,0.2> for production
+                PSYS_PART_START_SCALE, <0.3, 0.3, 0>,
+                PSYS_PART_END_SCALE, <0.1, 0.1, 0>,
+                PSYS_PART_START_GLOW, 0.2,
+                PSYS_PART_END_GLOW, 0,
+                PSYS_SRC_MAX_AGE, 0.2,
+                PSYS_PART_MAX_AGE, 0.75,
+                PSYS_SRC_BURST_RATE, 20,
+                PSYS_SRC_BURST_PART_COUNT, 1000,
+                PSYS_SRC_ACCEL, <0, 0, 0>,
+                PSYS_SRC_BURST_SPEED_MIN, 2,
+                PSYS_SRC_BURST_SPEED_MAX, 2,
+                PSYS_PART_FLAGS, PSYS_PART_EMISSIVE_MASK |
+                                 PSYS_PART_FOLLOW_VELOCITY_MASK |
+                                 PSYS_PART_INTERP_SCALE_MASK |
+                                 PSYS_PART_INTERP_COLOR_MASK
+               ];
     }
 
-    fwspiral() {
-        psname = "fwspiral";
+    Xsplodey() {
+        psname = "splodey";
         psys = [
-                PSYS_PART_FLAGS, PSYS_PART_INTERP_COLOR_MASK |
-                                 PSYS_PART_EMISSIVE_MASK |
-                                 PSYS_PART_FOLLOW_VELOCITY_MASK ,
-                PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_ANGLE,
-                PSYS_PART_MAX_AGE, 5.0,
-                PSYS_SRC_BURST_SPEED_MIN, 1.0,
-                PSYS_SRC_BURST_SPEED_MAX, 2.0,
-                PSYS_SRC_ACCEL, <0,0,0.2>,
-                PSYS_SRC_BURST_RATE, 0.05,
-                PSYS_SRC_BURST_PART_COUNT, 10,
-                PSYS_SRC_ANGLE_BEGIN,  0*DEG_TO_RAD,
-                PSYS_SRC_ANGLE_END, 90*DEG_TO_RAD,
-                PSYS_SRC_OMEGA, <0,0,20>,
-                PSYS_PART_START_SCALE, <0.25, 0.25, 0.0>,
-                PSYS_PART_START_ALPHA, 1.0,
-                PSYS_PART_END_ALPHA,   0.5,
-                PSYS_SRC_TEXTURE, "181c6b1d-c2d0-70ba-bbf2-52ccc31687c6"
-        ];
+                PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE,
+                PSYS_SRC_BURST_RADIUS, 0.02,
+                PSYS_PART_START_COLOR, <1, 0, 1>,       // Change psc to <-1,1,1> for production
+                PSYS_PART_END_COLOR, <0.2, 0.2, 0.2>,   // Change pec to <-2,1,0.2> for production
+                PSYS_PART_START_SCALE, <0.4, 0.4, 0>,
+                PSYS_PART_END_SCALE, <0.1, 0.1, 0>,
+                PSYS_PART_START_GLOW, 0.2,
+                PSYS_PART_END_GLOW, 0,
+                PSYS_SRC_MAX_AGE, 0.2,
+                PSYS_PART_MAX_AGE, 1.5,
+                PSYS_SRC_BURST_RATE, 20,
+                PSYS_SRC_BURST_PART_COUNT, 1000,
+                PSYS_SRC_ACCEL, <0, 0, 0>,
+                PSYS_SRC_BURST_SPEED_MIN, 1,
+                PSYS_SRC_BURST_SPEED_MAX, 5,
+                PSYS_PART_FLAGS, PSYS_PART_EMISSIVE_MASK |
+                                 PSYS_PART_FOLLOW_VELOCITY_MASK |
+                                 PSYS_PART_INTERP_SCALE_MASK |
+                                 PSYS_PART_INTERP_COLOR_MASK
+               ];
     }
 
+    //  Horizontal spiral emission of particles that fall
     yellowspire() {
         psname = "yellowspire";
         psys = [
@@ -339,6 +476,30 @@
                 PSYS_PART_END_ALPHA,   0.5,
                 PSYS_PART_START_COLOR, <1.0, 1.0, 0.0>,
                 PSYS_PART_END_COLOR,   <1.0, 0.0, 0.0>
+        ];
+    }
+
+    Xyellowspire() {
+        psname = "yellowspire";
+        psys = [
+                PSYS_PART_FLAGS, PSYS_PART_INTERP_COLOR_MASK |
+                                 PSYS_PART_EMISSIVE_MASK,
+                PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_ANGLE,
+                PSYS_PART_MAX_AGE, 2,
+                PSYS_SRC_MAX_AGE, 1.5,
+                PSYS_SRC_BURST_SPEED_MIN, 2,
+                PSYS_SRC_BURST_SPEED_MAX, 3,
+                PSYS_SRC_ACCEL, <0, 0, -3>,
+                PSYS_SRC_BURST_RATE, 0.05,
+                PSYS_SRC_BURST_PART_COUNT, 3000,
+                PSYS_SRC_ANGLE_BEGIN,  60 * DEG_TO_RAD,
+                PSYS_SRC_ANGLE_END, 0 * DEG_TO_RAD,
+                PSYS_SRC_OMEGA, <0, 0, 30>,
+                PSYS_PART_START_SCALE, <0.25, 0.25, 0>,
+                PSYS_PART_START_ALPHA, 1,
+                PSYS_PART_END_ALPHA,   0.25,
+                PSYS_PART_START_COLOR, <1, 1, 0>,
+                PSYS_PART_END_COLOR,   <1, 0, 0>
         ];
     }
 
@@ -442,24 +603,76 @@
         return s;
     }
 
+    /*  hsv_to_rgb  --  Convert HSV colour values stored in a vector
+                        (H = x, S = y, V = z) to RGB (R = x, G = y, B = z).
+                        The Hue is specified as a number from 0 to 1
+                        representing the colour wheel angle from 0 to 360
+                        degrees, while saturation and value are given as
+                        numbers from 0 to 1.  */
+
+    vector hsv_to_rgb(vector hsv) {
+        float h = hsv.x;
+        float s = hsv.y;
+        float v = hsv.z;
+
+        if (s == 0) {
+            return < v, v, v >;             // Grey scale
+        }
+
+        if (h >= 1) {
+            h = 0;
+        }
+        h *= 6;
+        integer i = (integer) llFloor(h);
+        float f = h - i;
+        float p = v * (1 - s);
+        float q = v * (1 - (s * f));
+        float t = v * (1 - (s * (1 - f)));
+        if (i == 0) {
+            return < v, t, p >;
+        } else if (i == 1) {
+            return < q, v, p >;
+        } else if (i == 2) {
+            return <p, v, t >;
+        } else if (i == 3) {
+            return < p, q, v >;
+        } else if (i == 4) {
+            return < t, p, v >;
+        } else if (i == 5) {
+            return < v, p, q >;
+        }
+//llOwnerSay("Blooie!  " + (string) hsv);
+        return < 0, 0, 0 >;
+    }
+
     tawk(string s) {
         llOwnerSay(s);
     }
 
     default {
         state_entry() {
+            llSetTexture("fireworks_512", ALL_SIDES);
+            llSetAlpha(1, ALL_SIDES);
             llSetLinkPrimitiveParamsFast(LINK_THIS,
                 [ PRIM_TEXT, "Fourmilab Fireworks\nOptical Effect Compiler", <0, 1, 0>, 1 ]);
             llParticleSystem([ ]);          // Clear any orphaned particle system
-splodey();
-//snow();
-//smoke();
+/*  Comment out the existing definition function and
+    replace with a call on your function.  */
+//Xfireplace();
+//Xfirework();
+Xsparkler();
+//Xsplodey();
+//Xyellowspire();
+
+//fireplace();
+//firework();
+//fwspiral();
 //gushBlood();
 //rain();
+//smoke();
+//snow();
 //sparkler();
-//firework();
-//fireplace();
-//fwspiral();
+//splodey();
 //yellowspire();
             string os = "\n";
             string oe = "Optical " + psname;
@@ -479,7 +692,7 @@ splodey();
                 key Vk;
                 vector Vv;
                 if (ty == TYPE_INTEGER) {
-                    Vi = llList2Integer(psys, i + 1);
+                    Vf = Vi = llList2Integer(psys, i + 1);
                 } else if (ty == TYPE_FLOAT) {
                     Vf = llList2Float(psys, i + 1);
                 } else if (ty == TYPE_STRING) {
@@ -533,12 +746,63 @@ splodey();
             tawk(os);
         }
 
-        touch_start(integer n) {
+        touch_start(integer ndet) {
             toggle = !toggle;
             if (toggle) {
-                llParticleSystem(psys);
+                llSetAlpha(0.2, ALL_SIDES);
+                llSetTexture(TEXTURE_BLANK, ALL_SIDES);
+                list ps = psys;
+                /*  Scan the particle system and replace colour
+                    specifications which have coded negative
+                    red channel values (.x) with random or previous
+                    HSV values in the same manner the firework shell
+                    does.  This allows testing optical effects using
+                    this feature within the compiler.  The random
+                    selection is made every time the effect is previewed,
+                    simulating its behaviour when installed in the
+                    launcher.  */
+                integer i;
+                integer n = llGetListLength(ps);
+                for (i = 0; i < n; i += 2) {
+                    integer rn = llList2Integer(ps, i);
+                    if ((rn == PSYS_PART_START_COLOR) ||
+                        (rn == PSYS_PART_END_COLOR)) {
+                        vector v = llList2Vector(ps, i + 1);
+                        if ((v.x < 0) || (v.y < 0) || (v.z < 0)) {
+                            if (v.x < 0) {
+                                if (v.x == -2) {
+                                    v.x = lastHSV.x;
+                                } else {
+                                    v.x = llFrand(1);
+                                }
+                            }
+                            if (v.y < 0) {
+                                if (v.y == -2) {
+                                    v.y = lastHSV.y;
+                                } else {
+                                    v.y = llFrand(1);
+                                }
+                            }
+                            if (v.z < 0) {
+                                if (v.z == -2) {
+                                    v.z = lastHSV.z;
+                                } else {
+                                    v.z = llFrand(1);
+                                }
+                            }
+                            lastHSV = v;
+                            v = hsv_to_rgb(v);
+                            ps = llListReplaceList(ps, [ v ], i + 1, i + 1);
+                        }
+                    }
+                }
+                llParticleSystem(ps);
+                tawk("Particles on");
             } else {
                 llParticleSystem([ ]);
+                tawk("Particles off");
+                llSetTexture("fireworks_512", ALL_SIDES);
+                llSetAlpha(1, ALL_SIDES);
             }
         }
     }

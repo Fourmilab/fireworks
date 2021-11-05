@@ -403,7 +403,7 @@ so I installed "vokoscreenNG".  It has a different means of specifying
 the window to be captured, and it mis-estimates the window boundary,
 so it actually chops off the bottom of the window and captures its own
 top border marker and beyond that.  You'll have to scale and shift the
-clips OpenShot to compensate.
+clips in OpenShot to compensate.
 
 2021 October 31
 
@@ -420,3 +420,25 @@ Added the YouTube video to the Marketplace listing.
 
 Added a link to the YouTube video to the README.md file for the
 repository.
+
+2021 November 4
+
+The code in the Optical Effect Compiler that processes rule, value
+pairs from the llParticleSystem() argument list was parsing values
+based upon the llGetListEntryType() result for the value item.  But if
+the value was defined as a float but specified as an integer (without
+decimal point or exponent), it was only being stored into the integer
+value variable and when we went to output it as a float, we'd use the
+float value, which was always zero.  I modified the code to, upon
+seeing a value of type integer, to set both the integer and float
+values so if it turns out to be interpreted as a float it is output
+correctly.
+
+Added code to the Optical Effect Compiler to implement the random and
+previous HSV colour specification that the Firework Shell does.  This
+allows development, testing, and direct deployment of effects using
+these features (specified by negative .x components in the RGB vectors
+specifying the colours for the PSYS_PART_START_COLOR and
+PSYS_PART_END_COLOR rules).  As in the Firework Shell, when testing the
+effect, the compiler chooses new random colours each time the effect
+is started.

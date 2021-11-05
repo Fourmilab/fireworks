@@ -1,4 +1,5 @@
-Legend <0, 1, 0> /<channel>
+#Legend <0, 1, 0> /<channel>'
+Legend
 #
 #   Optical effects
 #
@@ -25,6 +26,21 @@ Optical hearts pf 257 pss <0.25, 0.25, 0> pes <1. 1, 0> psc <1, 1, 1> pec <1, 1,
 Optical ants pf 257 pss <0.25, 0.25, 0> pes <1. 1, 0> psc <1, 1, 1> pec <1, 1, 1> psa 1 pea 1 sma 0 pma 1 sbrat 0
     Optical ants sbpc 4000 sp 8 sbrad 1 sab 0 sae 180 so <0, 0, 0> sbsmin 1.75 sbsmax 2 sa <0, 0, -0.25>
     Optical ants st 52350394-a031-1ac5-0edc-27bac17c732f
+#
+Optical spire pf 257 sp 4 pma 2 sma 1.5 sbsmin 2 sbsmax 3 sa <0, 0, -3>
+    Optical spire sbrat 0.05 sbpc 3000 sab 60 sae 0 so <0, 0, 30> pss <0.25, 0.25, 0> psa 1
+    Optical spire pea 0.25 psc <-1,1,1>  pec <-2, 1, 0.2>
+Optical fireplace pf 291 sp 2 psa 1 pea 0 psc <1, 1, 1> pec <1, 1, 1>
+    Optical fireplace pss <0.25, 0.25, 0> pes <1, 1, 0> pma 0.8 sma 1.5 sa <0, 0, 0> sab 0
+    Optical fireplace sae 60.16056 sbpc 500 sbrad 0.1 sbrat 1 sbsmin 0 sbsmax 1.5 so <0, 0, 0>
+    Optical fireplace st a96ecd50-96e1-28b4-51ec-96b3112210c0
+Optical xplodey sp 2 sbrad 0.02 psc <-1,1,1>  pec <-2, 1, 0.2>
+    Optical xplodey pss <0.4, 0.4, 0> pes <0.1, 0.1, 0> psg 0.2 peg 0 sma 0.2 pma 1.5 sbrat 20
+    Optical xplodey sbpc 1000 sa <0, 0, 0> sbsmin 1 sbsmax 5 pf 291
+Optical xpark sp 2 sma 1.5 pma 5 sbrat 0 sbpc 4500 sbrad 3 sbsmin 0.1
+    Optical xpark sbsmax 3 sa <0, 0, 0> psc <-1,1,1>  pec <-2, 1, 0.2> psa 1 pea 0.5
+    Optical xpark pss <0.15, 0.15, 0> pes <0.01, 0.01, 0> pf 307
+Group new spire fireplace xplodey xpark rays
 
 Optical fly pf 275 sp 1 sbrad 0.1 sab 0 sae 90 psc <0, 0.8, 0.85098> pec <0, 0.8, 0.85098> psa 0.25 pea 0
     Optical fly pss <0.03, 0.03, 0.03> pes <0.3, 0.3, 0.3> psg 0 peg 0 pbfs 7 pbfd 9  sma 0 pma 0.5 sbrat 0.02
