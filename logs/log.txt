@@ -442,3 +442,20 @@ specifying the colours for the PSYS_PART_START_COLOR and
 PSYS_PART_END_COLOR rules).  As in the Firework Shell, when testing the
 effect, the compiler chooses new random colours each time the effect
 is started.
+
+2021 November 6
+
+Broke the definitions of optical effects out of the Optical Effect
+Compiler into their own scripts which are kept in the inventory of
+the compiler.  When a Generate command is entered with the name of
+one of these scripts (whose names are prefixed with "Optical: "), the
+selected script responds with a message containing its name and the
+llParticleSystem() list as a JSON string, which the compiler turns into
+Optical declarations for the launcher and for preview when touched.  A
+List command lists effect scripts in the inventory.
+
+Created an "Optical: template" script to serve as a starting point for
+developing new effects.  It declares a particle system with all of the
+rules, defined in the order of the particle system Wiki page, along
+with comments to describe the process of defining, testing, and
+installing new effects.

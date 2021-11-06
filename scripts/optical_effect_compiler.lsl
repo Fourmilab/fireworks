@@ -16,6 +16,21 @@
     object to start the particle system running and touch it
     again to turn it off.  */
 
+    key owner;                      // Owner UUID
+
+    integer commandChannel = 1750;  /* Command channel in chat */
+    integer commandH;               // Handle for command channel
+    key whoDat = NULL_KEY;          // Avatar who sent command
+    integer restrictAccess = 0;     // Access restriction: 0 none, 1 group, 2 owner
+    integer echo = TRUE;            // Echo chat and script commands ?
+    float angleScale = DEG_TO_RAD;  // Scale factor for angles
+
+    string helpFileName = "Fourmilab Fireworks User Guide";
+
+    //  Compiler messages
+    integer LM_OC_REQUEST = 300;                // Request effect definition
+    integer LM_OC_REPLY = 301;                  // Return effect definition
+
     /*  The particle system definition function should
         store the name and the list defining the particle
         system into the following two variables.  */
@@ -27,233 +42,260 @@
 
     integer toggle = FALSE;             // Touch toggle
 
-    //  Flames burning upward
-    fireplace() {
-        psname = "fireplace";
-        psys = [
-                PSYS_PART_FLAGS, 291,
-                PSYS_SRC_PATTERN, 2,
-                PSYS_PART_START_ALPHA, 1.00,
-                PSYS_PART_END_ALPHA, 0.00,
-                PSYS_PART_START_COLOR, <1.00,1.00,1.00>,
-                PSYS_PART_END_COLOR, <1.00,1.00,1.00>,
-                PSYS_PART_START_SCALE, <0.25,0.25,0.00>,
-                PSYS_PART_END_SCALE, <1.00,1.00,0.00>,
-                PSYS_PART_MAX_AGE, 0.80,
-                PSYS_SRC_MAX_AGE, 0.00,
-                PSYS_SRC_ACCEL, <0.00,0.00,2.00>,
-                PSYS_SRC_ANGLE_BEGIN, 0.00,
-                PSYS_SRC_ANGLE_END, 1.05,
-                PSYS_SRC_BURST_PART_COUNT, 5,
-                PSYS_SRC_BURST_RADIUS, 0.10,
-                PSYS_SRC_BURST_RATE, 0.00,
-                PSYS_SRC_BURST_SPEED_MIN, 0.00,
-                PSYS_SRC_BURST_SPEED_MAX, 0.40,
-                PSYS_SRC_OMEGA, <0.00,0.00,0.00>,
-                PSYS_SRC_TEXTURE, "a96ecd50-96e1-28b4-51ec-96b3112210c0"
-        ];
+    //  tawk  --  Send a message to the interacting user in chat
+
+    tawk(string msg) {
+        if (whoDat == NULL_KEY) {
+            //  No known sender.  Say in nearby chat.
+            llSay(PUBLIC_CHANNEL, msg);
+        } else {
+            /*  While debugging, when speaking to the owner, use llOwnerSay()
+                rather than llRegionSayTo() to avoid the risk of a runaway
+                blithering loop triggering the gag which can only be removed
+                by a region restart.  */
+            if (owner == whoDat) {
+                llOwnerSay(msg);
+            } else {
+                llRegionSayTo(whoDat, PUBLIC_CHANNEL, msg);
+            }
+        }
     }
 
-    Xfireplace() {
-        psname = "fireplace";
-        psys = [
-                PSYS_PART_FLAGS, PSYS_PART_EMISSIVE_MASK |
-                                 PSYS_PART_FOLLOW_VELOCITY_MASK |
-                                 PSYS_PART_INTERP_SCALE_MASK |
-                                 PSYS_PART_INTERP_COLOR_MASK,
-                PSYS_SRC_PATTERN, 2,
-                PSYS_PART_START_ALPHA, 1,
-                PSYS_PART_END_ALPHA, 0,
-                PSYS_PART_START_COLOR, <1, 1, 1>,
-                PSYS_PART_END_COLOR, <1, 1, 1>,
-                PSYS_PART_START_SCALE, <0.25, 0.25, 0>,
-                PSYS_PART_END_SCALE, <1, 1, 0>,
-                PSYS_PART_MAX_AGE, 0.8,
-                PSYS_SRC_MAX_AGE, 1.5,
-                PSYS_SRC_ACCEL, ZERO_VECTOR,
-                PSYS_SRC_ANGLE_BEGIN, 0,
-                PSYS_SRC_ANGLE_END, 1.05,
-                PSYS_SRC_BURST_PART_COUNT, 500,
-                PSYS_SRC_BURST_RADIUS, 0.1,
-                PSYS_SRC_BURST_RATE, 1,
-                PSYS_SRC_BURST_SPEED_MIN, 0,
-                PSYS_SRC_BURST_SPEED_MAX, 1.5,
-                PSYS_SRC_OMEGA, ZERO_VECTOR,
-                PSYS_SRC_TEXTURE, "a96ecd50-96e1-28b4-51ec-96b3112210c0"
-        ];
+    //  checkAccess  --  Check if user has permission to send commands
+
+    integer checkAccess(key id) {
+        return (restrictAccess == 0) ||
+               ((restrictAccess == 1) && llSameGroup(id)) ||
+               (id == llGetOwner());
     }
 
-    //  Firework burst, spherical expansion
-    firework() {
-        psname = "firework";
-        psys = [
-                 PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE,
+    /*  fixArgs  --  Transform command arguments into canonical form.
+                     All white space within vector and rotation brackets
+                     is elided so they will be parsed as single arguments.  */
 
-                 PSYS_SRC_MAX_AGE, 0.,
-                 PSYS_PART_MAX_AGE, 9.,
+    string fixArgs(string cmd) {
+        cmd = llStringTrim(cmd, STRING_TRIM);
+        integer l = llStringLength(cmd);
+        integer inbrack = FALSE;
+        integer i;
+        string fcmd = "";
 
-                 PSYS_SRC_BURST_RATE, 20.,
-                 PSYS_SRC_BURST_PART_COUNT, 500,
-
-                 PSYS_SRC_BURST_RADIUS, .1,
-                 PSYS_SRC_BURST_SPEED_MIN, 3.,
-                 PSYS_SRC_BURST_SPEED_MAX, 3.,
-                 PSYS_SRC_ACCEL, <0.0,0.0,-0.8>,
-
-                 PSYS_PART_START_COLOR, <246,38,9>/255.,
-                 PSYS_PART_END_COLOR, <246,38,9>/255,
-
-                 PSYS_PART_START_ALPHA, 0.9,
-                 PSYS_PART_END_ALPHA, 0.0,
-
-                 PSYS_PART_START_SCALE, <.3,.3,0>,
-                 PSYS_PART_END_SCALE, <.1,.1,0>,
-
-                 PSYS_PART_FLAGS
-                 , 0
-                 | PSYS_PART_EMISSIVE_MASK
-                 | PSYS_PART_INTERP_COLOR_MASK
-                 | PSYS_PART_INTERP_SCALE_MASK
-                 | PSYS_PART_FOLLOW_VELOCITY_MASK
-                 //| PSYS_PART_WIND_MASK
-        ];
+        for (i = 0; i < l; i++) {
+            string c = llGetSubString(cmd, i, i);
+            if (inbrack && (c == ">")) {
+                inbrack = FALSE;
+            }
+            if (c == "<") {
+                inbrack = TRUE;
+            }
+            if (!((c == " ") && inbrack)) {
+                fcmd += c;
+            }
+        }
+        return fcmd;
     }
 
-    Xfirework() {
-        psname = "firework";
-        psys = [
-                 PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE,
+    //  abbrP  --  Test if string matches abbreviation
 
-                 PSYS_SRC_MAX_AGE, 0.,
-                 PSYS_PART_MAX_AGE, 9.,
-
-                 PSYS_SRC_BURST_RATE, 20.,
-                 PSYS_SRC_BURST_PART_COUNT, 500,
-
-                 PSYS_SRC_BURST_RADIUS, .1,
-                 PSYS_SRC_BURST_SPEED_MIN, 3.,
-                 PSYS_SRC_BURST_SPEED_MAX, 3.,
-                 PSYS_SRC_ACCEL, <0.0,0.0,-0.8>,
-
-                 PSYS_PART_START_COLOR, <246,38,9>/255.,
-                 PSYS_PART_END_COLOR, <246,38,9>/255,
-
-                 PSYS_PART_START_ALPHA, 0.9,
-                 PSYS_PART_END_ALPHA, 0.0,
-
-                 PSYS_PART_START_SCALE, <.3,.3,0>,
-                 PSYS_PART_END_SCALE, <.1,.1,0>,
-
-                 PSYS_PART_FLAGS
-                 , 0
-                 | PSYS_PART_EMISSIVE_MASK
-                 | PSYS_PART_INTERP_COLOR_MASK
-                 | PSYS_PART_INTERP_SCALE_MASK
-                 | PSYS_PART_FOLLOW_VELOCITY_MASK
-                 //| PSYS_PART_WIND_MASK
-        ];
+    integer abbrP(string str, string abbr) {
+        return abbr == llGetSubString(str, 0, llStringLength(abbr) - 1);
     }
 
+    //  onOff  --  Parse an on/off parameter
+
+    integer onOff(string param) {
+        if (abbrP(param, "on")) {
+            return TRUE;
+        } else if (abbrP(param, "of")) {
+            return FALSE;
+        } else {
+            tawk("Error: please specify on or off.");
+            return -1;
+        }
+    }
+
+    //  processCommand  --  Process a command
+
+    integer processCommand(key id, string message) {
+        list args;              // Argument list
+        integer argn;           // Argument list length
+
+        if (!checkAccess(id)) {
+            llRegionSayTo(id, PUBLIC_CHANNEL,
+                "You do not have permission to control this object.");
+            return FALSE;
+        }
+
+        whoDat = id;            // Direct chat output to sender of command
+
+        /*  If echo is enabled, echo command to sender unless
+            prefixed with "@".  The command is prefixed with ">>"
+            if entered from chat or "++" if from a script.  */
+
+        integer echoCmd = TRUE;
+        if (llGetSubString(llStringTrim(message, STRING_TRIM_HEAD), 0, 0) == "@") {
+            echoCmd = FALSE;
+            message = llGetSubString(llStringTrim(message, STRING_TRIM_HEAD), 1, -1);
+        }
+        if (echo && echoCmd) {
+            string prefix = ">> /" + (string) commandChannel + " ";
+            tawk(prefix + message);                 // Echo command to sender
+        }
+
+        string lmessage = fixArgs(llToLower(message));
+        args = llParseString2List(lmessage, [ " " ], []);    // Command and arguments
+        argn = llGetListLength(args);               // Number of arguments
+        string command = llList2String(args, 0);    // The command
+        string sparam = llList2String(args, 1);     // First argument, for convenience
+
+        //  Access who                  Restrict chat command access to public/group/owner
+
+        if (abbrP(command, "ac")) {
+            string who = sparam;
+
+            if (abbrP(who, "p")) {          // Public
+                restrictAccess = 0;
+            } else if (abbrP(who, "g")) {   // Group
+                restrictAccess = 1;
+            } else if (abbrP(who, "o")) {   // Owner
+                restrictAccess = 2;
+            } else {
+                tawk("Unknown access restriction \"" + who +
+                    "\".  Valid: public, group, owner.\n");
+                return FALSE;
+            }
+
+        //  Boot                    Reset the script to initial settings
+
+        } else if (abbrP(command, "bo")) {
+            llResetScript();
+
+        /*  Channel n               Change command channel.  Note that
+                                    the channel change is lost on a
+                                    script reset.  */
+        } else if (abbrP(command, "ch")) {
+            integer newch = (integer) sparam;
+            if ((newch < 2)) {
+                tawk("Invalid channel " + (string) newch + ".");
+                return FALSE;
+            } else {
+                llListenRemove(commandH);
+                commandChannel = newch;
+                commandH = llListen(commandChannel, "", NULL_KEY, "");
+                tawk("Listening on /" + (string) commandChannel);
+            }
+
+        //  Clear                   Clear chat for debugging
+
+        } else if (abbrP(command, "cl")) {
+            tawk("\n\n\n\n\n\n\n\n\n\n\n\n\n");
+
+        //  Echo text               Send text to sender
+
+        } else if (abbrP(command, "ec")) {
+            integer dindex = llSubStringIndex(lmessage, command);
+            integer doff = llSubStringIndex(llGetSubString(lmessage, dindex, -1), " ");
+            string emsg = " ";
+            if (doff >= 0) {
+                emsg = llStringTrim(llGetSubString(message, dindex + doff + 1, -1),
+                            STRING_TRIM_TAIL);
+            }
+            tawk(emsg);
+
+        //  Generate patname        Generate patname
+
+        } else if (abbrP(command, "ge")) {
+            llMessageLinked(LINK_THIS, LM_OC_REQUEST, sparam, whoDat);
+            llSetTimerEvent(0.25);      // Start no-response timeout
+
+        //  Help                    Give help information
+
+        } else if (abbrP(command, "he")) {
+            llGiveInventory(id, helpFileName);      // Give requester the User Guide notecard
+
+        //  List                    List defined effects
+
+        } else if (abbrP(command, "li")) {
+            integer n = llGetInventoryNumber(INVENTORY_SCRIPT);
+            integer i;
+            integer j = 0;
+            for (i = 0; i < n; i++) {
+                string s = llGetInventoryName(INVENTORY_SCRIPT, i);
+                if ((s != "") && (llGetSubString(s, 0, 8) == "Optical: ")) {
+                    tawk("  " + (string) (++j) + ". " + llGetSubString(s, 9, -1));
+                }
+            }
+
+
+        //  Set                     Set parameter
+
+        } else if (abbrP(command, "se")) {
+            string svalue = llList2String(args, 2);
+
+            //  Set angles degrees/radians  Set angle input to degrees or radians
+
+            if (abbrP(sparam, "an")) {
+                if (abbrP(svalue, "d")) {
+                    angleScale = DEG_TO_RAD;
+                } else if (abbrP(svalue, "r")) {
+                    angleScale = 1;
+                } else {
+                    tawk("Invalid set angle.  Valid: degree, radian.");
+                }
+
+                //  Set echo on/off
+
+                } else if (abbrP(sparam, "ec")) {
+                    echo = onOff(svalue);
+
+                } else {
+                    tawk("Setting unknown.");
+                    return FALSE;
+                }
+
+        //  Status                  Print status
+
+        } else if (abbrP(command, "st")) {
+            string stat = "";
+            integer mFree = llGetFreeMemory();
+            integer mUsed = llGetUsedMemory();
+            stat += "    Script memory.  Free: " + (string) mFree +
+                    "  Used: " + (string) mUsed + " (" +
+                    (string) ((integer) llRound((mUsed * 100.0) / (mUsed + mFree))) + "%)";
+            tawk(stat);
+
+        } else {
+            tawk("Huh?  \"" + message + "\" undefined.  Chat /" +
+                (string) commandChannel + " help for instructions.");
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+/*
     //  Spiral ejection of crystals, which rise upward
 
-    fwspiral() {
+    crystals() {
         psname = "fwspiral";
         psys = [
                 PSYS_PART_FLAGS, PSYS_PART_INTERP_COLOR_MASK |
                                  PSYS_PART_EMISSIVE_MASK |
                                  PSYS_PART_FOLLOW_VELOCITY_MASK ,
                 PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_ANGLE,
-                PSYS_PART_MAX_AGE, 5.0,
-                PSYS_SRC_BURST_SPEED_MIN, 1.0,
-                PSYS_SRC_BURST_SPEED_MAX, 2.0,
-                PSYS_SRC_ACCEL, <0,0,0.2>,
+                PSYS_SRC_MAX_AGE, 1.5,
+                PSYS_PART_MAX_AGE, 1.5,
+                PSYS_SRC_BURST_SPEED_MIN, 1,
+                PSYS_SRC_BURST_SPEED_MAX, 2,
+                PSYS_SRC_ACCEL, <0, 0, 0.2>,
                 PSYS_SRC_BURST_RATE, 0.05,
                 PSYS_SRC_BURST_PART_COUNT, 10,
-                PSYS_SRC_ANGLE_BEGIN,  0*DEG_TO_RAD,
-                PSYS_SRC_ANGLE_END, 90*DEG_TO_RAD,
-                PSYS_SRC_OMEGA, <0,0,20>,
+                PSYS_SRC_ANGLE_BEGIN,  0,
+                PSYS_SRC_ANGLE_END, 90 * DEG_TO_RAD,
+                PSYS_SRC_OMEGA, <0, 0, 20>,
                 PSYS_PART_START_SCALE, <0.25, 0.25, 0.0>,
                 PSYS_PART_START_ALPHA, 1.0,
-                PSYS_PART_END_ALPHA,   0.5,
+                PSYS_PART_END_ALPHA, 0.5,
                 PSYS_SRC_TEXTURE, "181c6b1d-c2d0-70ba-bbf2-52ccc31687c6"
-        ];
-    }
-
-    //  Blood gushing upward
-    gushBlood() {
-        psname = "gushblood";
-        // MASK FLAGS: set  to "TRUE" to enable
-        integer glow = TRUE;                        // Makes the particles glow
-        integer bounce = FALSE;                     // Make particles bounce on Z plane of objects
-        integer interpColor = TRUE;                 // Color - from start value to end value
-        integer interpSize = TRUE;                  // Size - from start value to end value
-        integer wind = FALSE;                       // Particles effected by wind
-        integer followSource = FALSE;               // Particles follow the source
-        integer followVel = TRUE;                   // Particles turn to velocity direction
-        // Choose a pattern from the following:
-                                                    // PSYS_SRC_PATTERN_EXPLODE
-                                                    // PSYS_SRC_PATTERN_DROP
-                                                    // PSYS_SRC_PATTERN_ANGLE_CONE_EMPTY
-                                                    // PSYS_SRC_PATTERN_ANGLE_CONE
-                                                    // PSYS_SRC_PATTERN_ANGLE
-        integer pattern = PSYS_SRC_PATTERN_ANGLE;   // PSYS_SRC_PATTERN_EXPLODE;
-                                                    // Select a target for particles to go towards
-                                                    // "" for no target, "owner will follow object owner
-                                                    //    and "self" will target this object
-                                                    //    or put the key of an object for particles to go to
-        key target = "";
-                                                    // PARTICLE PARAMETERS
-        float age = 2.4;                            // Life of each particle
-        float maxSpeed = 20.0;                      // Max speed each particle is spit out at
-        float minSpeed = 10;                        // Min speed each particle is spit out at
-        string texture = "0498c309-5306-43cd-82a2-ae31d096cdef";    // Texture used for particles, default used if blank
-        float startAlpha = 0.5;                     // Start alpha (transparency) value
-        float endAlpha = 0.5;                       // End alpha (transparency) value
-        vector startColor = <1,0,0>;                // Start color of particles <R,G,B>
-        vector endColor = <0.6,0,0>;                // End color of particles <R,G,B> (if interpColor == TRUE)
-        vector startSize = <1.0,2.0,1.0>;           // Start size of particles
-        vector endSize = <1,2,1.0>;                 // End size of particles (if interpSize == TRUE)
-        vector push = <0.0,0.0,-5.0>;               // Force pushed on particles
-                                                    // SYSTEM PARAMETERS
-        float rate = 0.1;                           // How fast (rate) to emit particles
-        float radius = 0.25;                        // Radius to emit particles for BURST pattern
-        integer count = 40;                         // How many particles to emit per BURST
-        float outerAngle = 4*PI;                    // Outer angle for all ANGLE patterns   PI/4
-        float innerAngle = 0.5;                     // Inner angle for all ANGLE patterns
-        vector omega = <0,0,0>;                     // Rotation of ANGLE patterns around the source
-        float life = 0;                             // Life in seconds for the system to make particles
-                                                    // SCRIPT VARIABLES
-        integer flags;
-        flags = 0;
-        if (glow) flags = flags | PSYS_PART_EMISSIVE_MASK;
-        if (bounce) flags = flags | PSYS_PART_BOUNCE_MASK;
-        if (interpColor) flags = flags | PSYS_PART_INTERP_COLOR_MASK;
-        if (interpSize) flags = flags | PSYS_PART_INTERP_SCALE_MASK;
-        if (wind) flags = flags | PSYS_PART_WIND_MASK;
-        if (followSource) flags = flags | PSYS_PART_FOLLOW_SRC_MASK;
-        if (followVel) flags = flags | PSYS_PART_FOLLOW_VELOCITY_MASK;
-        if (target != "") flags = flags | PSYS_PART_TARGET_POS_MASK;
-        psys = [  PSYS_PART_MAX_AGE,age,
-                        PSYS_PART_FLAGS,flags,
-                        PSYS_PART_START_COLOR, startColor,
-                        PSYS_PART_END_COLOR, endColor,
-                        PSYS_PART_START_SCALE,startSize,
-                        PSYS_PART_END_SCALE,endSize,
-                        PSYS_SRC_PATTERN, pattern,
-                        PSYS_SRC_BURST_RATE,rate,
-                        PSYS_SRC_ACCEL, push,
-                        PSYS_SRC_BURST_PART_COUNT,count,
-                        PSYS_SRC_BURST_RADIUS,radius,
-                        PSYS_SRC_BURST_SPEED_MIN,minSpeed,
-                        PSYS_SRC_BURST_SPEED_MAX,maxSpeed,
-                        PSYS_SRC_TARGET_KEY,target,
-                        PSYS_SRC_ANGLE_BEGIN,innerAngle,
-                        PSYS_SRC_ANGLE_END,outerAngle,
-                        PSYS_SRC_OMEGA, omega,
-                        PSYS_SRC_MAX_AGE, life,
-                        PSYS_SRC_TEXTURE, texture,
-                        PSYS_PART_START_ALPHA, startAlpha,
-                        PSYS_PART_END_ALPHA, endAlpha
         ];
     }
 
@@ -304,206 +346,7 @@
                 PSYS_PART_END_ALPHA, 0.00,
                 PSYS_SRC_ACCEL, <0.00, 0.00, 1.14>];
     }
-
-    //  Snowflakes falling from the particle source
-    snow() {
-        psname = "snow";                // Name of particle system
-        psys = [
-                // Define the particle system here
-                PSYS_PART_FLAGS, 0,
-                PSYS_PART_START_COLOR, <3.10000, 2.30000, 1.70000>,
-                PSYS_PART_END_COLOR, <-0.10000, -0.60000, -1.70000>,
-                PSYS_PART_START_SCALE, <0.050000, 0.05000, 0.00000>,
-                PSYS_PART_END_SCALE, <0.00000, 0.00000, 0.00000>,
-                PSYS_SRC_PATTERN, 8,
-                PSYS_SRC_BURST_RATE, 0.000000,
-                PSYS_SRC_ACCEL, <0.00000, 0.00000, -0.40000>,
-                PSYS_SRC_BURST_PART_COUNT, 10,                  // increase for more snow
-                PSYS_SRC_BURST_RADIUS, 0.000000,
-                PSYS_SRC_BURST_SPEED_MIN, 0.000000,
-                PSYS_SRC_BURST_SPEED_MAX, 0.300000,             // increase for longer distance
-                PSYS_SRC_TARGET_KEY, llGetKey(),
-                PSYS_SRC_ANGLE_BEGIN, 3.141593,
-                PSYS_SRC_ANGLE_END, 6.283185,
-                PSYS_SRC_OMEGA, <0.00000, 0.10000, 0.00000>,
-                PSYS_SRC_MAX_AGE, 0.00000,
-                PSYS_SRC_TEXTURE, "99214e66-0e50-f8b8-142b-9a0b82a480a3",  // change this to any texture name that is also in the prim, or use the UUID. If you use the UUID and want to give it to others, make sure the texture in your inventory has copy on it.
-                PSYS_PART_START_ALPHA, 0.300000,                // increase for less transparent snow
-                PSYS_PART_END_ALPHA, 0.00000
-        ];
-    }
-
-    //  Sparks emitted from a source: standard "sparkler" Optical
-    sparkler() {
-        psname = "sparkler";
-        psys = [
-                 PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE,
-
-                 PSYS_SRC_MAX_AGE, 0.,
-                 PSYS_PART_MAX_AGE, .6,
-
-                 PSYS_SRC_BURST_RATE, .05,
-                 PSYS_SRC_BURST_PART_COUNT, 50,
-
-                 PSYS_SRC_BURST_RADIUS, 1.,
-                 PSYS_SRC_BURST_SPEED_MIN, .1,
-                 PSYS_SRC_BURST_SPEED_MAX, 2.,
-                 PSYS_SRC_ACCEL, <0.0,0.0,-0.8>,
-
-                 PSYS_PART_START_COLOR, <1,1,1>,
-                 PSYS_PART_END_COLOR, <1,0,0>,
-
-                 PSYS_PART_START_ALPHA, 0.9,
-                 PSYS_PART_END_ALPHA, 0.0,
-
-                 PSYS_PART_START_SCALE, <.15,.15,0>,
-                 PSYS_PART_END_SCALE, <.01,.1,0>,
-
-                 PSYS_PART_FLAGS
-                 , 0
-                 | PSYS_PART_EMISSIVE_MASK
-                 | PSYS_PART_INTERP_COLOR_MASK
-                 | PSYS_PART_INTERP_SCALE_MASK
-                 | PSYS_PART_FOLLOW_SRC_MASK
-                 | PSYS_PART_FOLLOW_VELOCITY_MASK
-        ];
-    }
-
-    Xsparkler() {
-        psname = "sparkler";
-        psys = [
-                 PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE,
-
-                 PSYS_SRC_MAX_AGE, 1.5,
-                 PSYS_PART_MAX_AGE, 5,
-
-                 PSYS_SRC_BURST_RATE, 0,
-                 PSYS_SRC_BURST_PART_COUNT, 4500,
-
-                 PSYS_SRC_BURST_RADIUS, 3,
-                 PSYS_SRC_BURST_SPEED_MIN, 0.1,
-                 PSYS_SRC_BURST_SPEED_MAX, 3,
-                 PSYS_SRC_ACCEL, <0, 0, 0>,
-
-                 PSYS_PART_START_COLOR, <-1, 1, 1>,
-                 PSYS_PART_END_COLOR, <-2, 1, 0>,
-
-                 PSYS_PART_START_ALPHA, 1,
-                 PSYS_PART_END_ALPHA, 0.5,
-
-                 PSYS_PART_START_SCALE, <0.15, 0.15, 0>,
-                 PSYS_PART_END_SCALE, <0.01, 0.01, 0>,
-
-                 PSYS_PART_FLAGS
-                 , 0
-                 | PSYS_PART_EMISSIVE_MASK
-                 | PSYS_PART_INTERP_COLOR_MASK
-                 | PSYS_PART_INTERP_SCALE_MASK
-                 | PSYS_PART_FOLLOW_SRC_MASK
-                 | PSYS_PART_FOLLOW_VELOCITY_MASK
-        ];
-    }
-
-    //  This is the splodey Optical from the standard Configuration notecard
-    splodey() {
-        psname = "splodey";
-        psys = [
-                PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE,
-                PSYS_SRC_BURST_RADIUS, 0.2,
-                PSYS_PART_START_COLOR, <1, 0, 1>,       // Change psc to <-1,1,1> for production
-                PSYS_PART_END_COLOR, <0.2, 0.2, 0.2>,   // Change pec to <-2,1,0.2> for production
-                PSYS_PART_START_SCALE, <0.3, 0.3, 0>,
-                PSYS_PART_END_SCALE, <0.1, 0.1, 0>,
-                PSYS_PART_START_GLOW, 0.2,
-                PSYS_PART_END_GLOW, 0,
-                PSYS_SRC_MAX_AGE, 0.2,
-                PSYS_PART_MAX_AGE, 0.75,
-                PSYS_SRC_BURST_RATE, 20,
-                PSYS_SRC_BURST_PART_COUNT, 1000,
-                PSYS_SRC_ACCEL, <0, 0, 0>,
-                PSYS_SRC_BURST_SPEED_MIN, 2,
-                PSYS_SRC_BURST_SPEED_MAX, 2,
-                PSYS_PART_FLAGS, PSYS_PART_EMISSIVE_MASK |
-                                 PSYS_PART_FOLLOW_VELOCITY_MASK |
-                                 PSYS_PART_INTERP_SCALE_MASK |
-                                 PSYS_PART_INTERP_COLOR_MASK
-               ];
-    }
-
-    Xsplodey() {
-        psname = "splodey";
-        psys = [
-                PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_EXPLODE,
-                PSYS_SRC_BURST_RADIUS, 0.02,
-                PSYS_PART_START_COLOR, <1, 0, 1>,       // Change psc to <-1,1,1> for production
-                PSYS_PART_END_COLOR, <0.2, 0.2, 0.2>,   // Change pec to <-2,1,0.2> for production
-                PSYS_PART_START_SCALE, <0.4, 0.4, 0>,
-                PSYS_PART_END_SCALE, <0.1, 0.1, 0>,
-                PSYS_PART_START_GLOW, 0.2,
-                PSYS_PART_END_GLOW, 0,
-                PSYS_SRC_MAX_AGE, 0.2,
-                PSYS_PART_MAX_AGE, 1.5,
-                PSYS_SRC_BURST_RATE, 20,
-                PSYS_SRC_BURST_PART_COUNT, 1000,
-                PSYS_SRC_ACCEL, <0, 0, 0>,
-                PSYS_SRC_BURST_SPEED_MIN, 1,
-                PSYS_SRC_BURST_SPEED_MAX, 5,
-                PSYS_PART_FLAGS, PSYS_PART_EMISSIVE_MASK |
-                                 PSYS_PART_FOLLOW_VELOCITY_MASK |
-                                 PSYS_PART_INTERP_SCALE_MASK |
-                                 PSYS_PART_INTERP_COLOR_MASK
-               ];
-    }
-
-    //  Horizontal spiral emission of particles that fall
-    yellowspire() {
-        psname = "yellowspire";
-        psys = [
-                PSYS_PART_FLAGS, PSYS_PART_INTERP_COLOR_MASK |
-                                 PSYS_PART_EMISSIVE_MASK,
-                PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_ANGLE,
-                PSYS_PART_MAX_AGE, 10.0,
-                PSYS_SRC_BURST_SPEED_MIN, 1.0,
-                PSYS_SRC_BURST_SPEED_MAX, 1.0,
-                PSYS_SRC_ACCEL, <0,0,-0.1>,
-                PSYS_SRC_BURST_RATE, 0.05,
-                PSYS_SRC_BURST_PART_COUNT, 10,
-                PSYS_SRC_ANGLE_BEGIN,  90*DEG_TO_RAD,
-                PSYS_SRC_ANGLE_END, 90*DEG_TO_RAD,
-                PSYS_SRC_OMEGA, <0,0,20>,
-                PSYS_PART_START_SCALE, <0.25, 0.25, 0.0>,
-                PSYS_PART_START_ALPHA, 1.0,
-                PSYS_PART_END_ALPHA,   0.5,
-                PSYS_PART_START_COLOR, <1.0, 1.0, 0.0>,
-                PSYS_PART_END_COLOR,   <1.0, 0.0, 0.0>
-        ];
-    }
-
-    Xyellowspire() {
-        psname = "yellowspire";
-        psys = [
-                PSYS_PART_FLAGS, PSYS_PART_INTERP_COLOR_MASK |
-                                 PSYS_PART_EMISSIVE_MASK,
-                PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_ANGLE,
-                PSYS_PART_MAX_AGE, 2,
-                PSYS_SRC_MAX_AGE, 1.5,
-                PSYS_SRC_BURST_SPEED_MIN, 2,
-                PSYS_SRC_BURST_SPEED_MAX, 3,
-                PSYS_SRC_ACCEL, <0, 0, -3>,
-                PSYS_SRC_BURST_RATE, 0.05,
-                PSYS_SRC_BURST_PART_COUNT, 3000,
-                PSYS_SRC_ANGLE_BEGIN,  60 * DEG_TO_RAD,
-                PSYS_SRC_ANGLE_END, 0 * DEG_TO_RAD,
-                PSYS_SRC_OMEGA, <0, 0, 30>,
-                PSYS_PART_START_SCALE, <0.25, 0.25, 0>,
-                PSYS_PART_START_ALPHA, 1,
-                PSYS_PART_END_ALPHA,   0.25,
-                PSYS_PART_START_COLOR, <1, 1, 0>,
-                PSYS_PART_END_COLOR,   <1, 0, 0>
-        ];
-    }
-
-    float angleScale = DEG_TO_RAD;  // Scale factor for angles
+*/
 
     integer TYPE_ANGLE = 7;         /* We distinguish angles from floats
                                        in order to apply angleScale to them */
@@ -645,105 +488,161 @@
         return < 0, 0, 0 >;
     }
 
-    tawk(string s) {
-        llOwnerSay(s);
+    /*  psDecodeBasic  --  Decode particle system rule set from JSON string
+
+        This is complicated by the fact that JSON doesn't distinguish
+        LSL-specific data types such as vectors and keys from strings.
+        We have to identify these by their rule type codes and cast
+        accordingly when assembling the decoded list.  */
+
+    list psDecodeBasic(list l) {
+        integer n = llGetListLength(l);
+        list o;
+        integer i;
+        list vectype = [ PSYS_PART_START_COLOR, PSYS_PART_END_COLOR,
+                         PSYS_PART_START_SCALE, PSYS_PART_END_SCALE,
+                         PSYS_SRC_OMEGA, PSYS_SRC_ACCEL ];
+
+        for (i = 0; i < n; i += 2) {
+            integer rule = llList2Integer(l, i);
+            o += [ rule ];
+            if (llListFindList(vectype, [ rule ]) >= 0) {
+                vector v;
+                v = (vector)  llList2String(l, i + 1);
+                o += [ v ];
+            } else {
+                integer lty = llGetListEntryType(l, i + 1);
+                if (rule == PSYS_SRC_TARGET_KEY) {
+                    o += [ llList2String(l, i + 1) ];
+                } else if (lty == TYPE_INTEGER) {
+                    o += [ llList2Integer(l, i + 1) ];
+                } else if (lty == TYPE_FLOAT) {
+                    o += [ llList2Float(l, i + 1) ];
+                } else if (lty == TYPE_STRING) {
+                    o += [ llList2String(l, i + 1) ];
+                }
+            }
+        }
+        return o;
+    }
+
+    /*  effEncode  --  Encode the particle system as an Optical
+                       declaration.  */
+
+    effEncode() {
+        string os = "\n";
+        string oe = "Optical " + psname;
+        integer n = llGetListLength(psys);
+        integer m = llGetListLength(keywords);
+        if ((n & 1) != 0) {
+            tawk("psys list length is odd");
+            return;
+        }
+        integer i;
+        for (i = 0; i < n; i += 2) {
+            integer rule = llList2Integer(psys, i);
+            integer ty = llGetListEntryType(psys, i + 1);
+            integer Vi;
+            float Vf;
+            string Vs;
+            key Vk;
+            vector Vv;
+            if (ty == TYPE_INTEGER) {
+                Vf = Vi = llList2Integer(psys, i + 1);
+            } else if (ty == TYPE_FLOAT) {
+                Vf = llList2Float(psys, i + 1);
+            } else if (ty == TYPE_STRING) {
+                Vs = llList2String(psys, i + 1);
+            } else if (ty == TYPE_KEY) {
+                Vk = llList2Key(psys, i + 1);
+            } else if (ty == TYPE_VECTOR) {
+                Vv = llList2Vector(psys, i + 1);
+            } else {
+                tawk("Blooie!  Unknown type " + (string) ty +
+                    " for rule " + (string) rule +
+                    " at index " + (string) i);
+            }
+
+            integer j;
+            for (j = 0; j < m; j += 3) {
+                if (llList2Integer(keywords, j + 1) == rule) {
+                    jump cazart;
+                }
+            }
+            tawk("Cannot find abbreviation for rule " + (string) rule +
+                 " at index " + (string) i);
+            tawk("\n>> " + llList2CSV(llList2List(psys, 0, i - 1)) + "\n<< " +
+                llList2CSV(llList2List(psys, i, -1)));
+            return;
+@cazart;
+            string spec = " " + llList2String(keywords, j) + " ";
+            integer tl = llList2Integer(keywords, j + 2);
+            string ts;
+            if (tl == TYPE_INTEGER) {
+                ts = (string) Vi;
+            } else if (tl == TYPE_FLOAT) {
+                ts = eff(Vf);
+            } else if (tl == TYPE_ANGLE) {
+                ts = efa(Vf);
+            } else if (tl == TYPE_STRING) {
+                ts = Vs;
+            } else if (tl == TYPE_KEY) {
+                ts = Vs;
+            } else if (tl == TYPE_VECTOR) {
+                ts = efv(Vv);
+            }
+            spec += ts;
+            if ((llStringLength(oe) + llStringLength(spec)) > 80) {
+                os += oe + "\n    Optical " + psname ;
+                oe = "";
+            }
+            oe += spec;
+        }
+        os += oe;
+        tawk(os);
     }
 
     default {
         state_entry() {
+            whoDat = owner = llGetOwner();
+
             llSetTexture("fireworks_512", ALL_SIDES);
             llSetAlpha(1, ALL_SIDES);
             llSetLinkPrimitiveParamsFast(LINK_THIS,
                 [ PRIM_TEXT, "Fourmilab Fireworks\nOptical Effect Compiler", <0, 1, 0>, 1 ]);
             llParticleSystem([ ]);          // Clear any orphaned particle system
-/*  Comment out the existing definition function and
-    replace with a call on your function.  */
-//Xfireplace();
-//Xfirework();
-Xsparkler();
-//Xsplodey();
-//Xyellowspire();
 
-//fireplace();
-//firework();
-//fwspiral();
-//gushBlood();
-//rain();
-//smoke();
-//snow();
-//sparkler();
-//splodey();
-//yellowspire();
-            string os = "\n";
-            string oe = "Optical " + psname;
-            integer n = llGetListLength(psys);
-            integer m = llGetListLength(keywords);
-            if ((n & 1) != 0) {
-                tawk("psys list length is odd");
-                return;
-            }
-            integer i;
-            for (i = 0; i < n; i += 2) {
-                integer rule = llList2Integer(psys, i);
-                integer ty = llGetListEntryType(psys, i + 1);
-                integer Vi;
-                float Vf;
-                string Vs;
-                key Vk;
-                vector Vv;
-                if (ty == TYPE_INTEGER) {
-                    Vf = Vi = llList2Integer(psys, i + 1);
-                } else if (ty == TYPE_FLOAT) {
-                    Vf = llList2Float(psys, i + 1);
-                } else if (ty == TYPE_STRING) {
-                    Vs = llList2String(psys, i + 1);
-                } else if (ty == TYPE_KEY) {
-                    Vk = llList2Key(psys, i + 1);
-                } else if (ty == TYPE_VECTOR) {
-                    Vv = llList2Vector(psys, i + 1);
-                } else {
-                    tawk("Blooie!  Unknown type " + (string) ty +
-                        " for rule " + (string) rule +
-                        " at index " + (string) i);
-                }
+            //  Start listening on the command chat channel
+            commandH = llListen(commandChannel, "", NULL_KEY, "");
+            llOwnerSay("Listening on /" + (string) commandChannel);
+//crystals();
+        }
 
-                integer j;
-                for (j = 0; j < m; j += 3) {
-                    if (llList2Integer(keywords, j + 1) == rule) {
-                        jump cazart;
-                    }
-                }
-                tawk("Cannot find abbreviation for rule " + (string) rule +
-                     " at index " + (string) i);
-                tawk("\n>> " + llList2CSV(llList2List(psys, 0, i - 1)) + "\n<< " +
-                    llList2CSV(llList2List(psys, i, -1)));
-                return;
-@cazart;
-                string spec = " " + llList2String(keywords, j) + " ";
-                integer tl = llList2Integer(keywords, j + 2);
-                string ts;
-                if (tl == TYPE_INTEGER) {
-                    ts = (string) Vi;
-                } else if (tl == TYPE_FLOAT) {
-                    ts = eff(Vf);
-                } else if (tl == TYPE_ANGLE) {
-                    ts = efa(Vf);
-                } else if (tl == TYPE_STRING) {
-                    ts = Vs;
-                } else if (tl == TYPE_KEY) {
-                    ts = Vs;
-                } else if (tl == TYPE_VECTOR) {
-                    ts = efv(Vv);
-                }
-                spec += ts;
-                if ((llStringLength(oe) + llStringLength(spec)) > 80) {
-                    os += oe + "\n    Optical " + psname ;
-                    oe = "";
-                }
-                oe += spec;
+        /*  The listen event handler processes messages from
+            our chat control channel.  */
+
+        listen(integer channel, string name, key id, string message) {
+            if (channel == commandChannel) {
+                processCommand(id, message);
             }
-            os += oe;
-            tawk(os);
+        }
+
+        /*  The link_message() event receives the particle system
+            parameters from the definition script that responds to
+            our LM_OC_REQUEST query and generates the Optical
+            statements to define it.  */
+
+        link_message(integer sender, integer num, string str, key id) {
+            if (num == LM_OC_REPLY) {
+                llSetTimerEvent(0);     // Clear no-response timeout
+//tawk("Eff: " + str);
+                list l = llJson2List(str);
+                psname = llList2String(l, 0);
+                l = llDeleteSubList(l, 0, 0);
+                psys = psDecodeBasic(l);
+//tawk("Dec: " + llList2CSV(psys));
+                effEncode();
+            }
         }
 
         touch_start(integer ndet) {
@@ -804,5 +703,19 @@ Xsparkler();
                 llSetTexture("fireworks_512", ALL_SIDES);
                 llSetAlpha(1, ALL_SIDES);
             }
+        }
+
+        /*  We use the timer to detect failure of a definition
+            script to respond to a LM_OC_REQUEST message.  This
+            indicates the user has specified an undefined optical
+            definition.  Doing it this way means we don't need a
+            list of valid definitions, and that new definitions
+            can be added simply by adding their scripts to the
+            compiler's inventory.  */
+
+        timer() {
+            llSetTimerEvent(0);         // Cancel timer
+            tawk("Optical effect not defined.\n" +
+                 "Use List to see defined effects.");
         }
     }

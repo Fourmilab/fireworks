@@ -426,6 +426,10 @@ fireworks launcher.  The Compiler is supplied with definitions of a
 variety of particle systems you may use as starting points for your own
 experiments.
 
+The compiler supports the extended HSV colour specifications described
+above with negative first components, allowing you to develop and test
+them before deploying in the launcher configuration.
+
 CONFIGURATION NOTECARD
 
 When the fireworks launcher is initially rezzed or reset with the Boot
