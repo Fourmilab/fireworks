@@ -459,3 +459,13 @@ developing new effects.  It declares a particle system with all of the
 rules, defined in the order of the particle system Wiki page, along
 with comments to describe the process of defining, testing, and
 installing new effects.
+
+Rebuilt all of the burst optical effects with definitions produced with
+the Optical Effects Compiler and cleaned up the messy Configuration
+notecard to define them in alphabetical order and eliminate some cruft
+which had accreted in the development phase.  This is now converging
+upon something ready for release.
+
+Developed a new  Optical called "ball".  It represents a spherical
+burst that doesn't expand but rather fades the way bang shells do.
+This effect was added to the standard "burst" group.
