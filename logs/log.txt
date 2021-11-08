@@ -469,3 +469,26 @@ upon something ready for release.
 Developed a new  Optical called "ball".  It represents a spherical
 burst that doesn't expand but rather fades the way bang shells do.
 This effect was added to the standard "burst" group.
+
+2021 November 7
+
+Implemented the first draft of the Rule command in the Optical Effect
+Compiler.  Once you've loaded a rule, you can modify or add parameters
+in its definition with:
+    Rule mnemonic value
+where mnemonic is the abbreviation of the rule name as used on the
+Optical command and value is its value, of the appropriate type.  If
+that rule already exists in the definition, it is replaced.  If not,
+the (rule, value) pair is appended to the definition.  The updated
+Optical declarations for the rule are then displayed and it may be
+previewed by touching the Compiler object.  This makes it much easier
+to experiment with values in effect definitions compared to recompiling
+the definition script and re-generating it every time.
+
+Added a "snow" effect to the defaults in the Optical Effect Compiler.
+It makes snowflakes (a known texture accessible via UUID) which radiate
+outward and then fall toward the ground.  This is a preliminary version
+which can benefit from from experimentation and refinement.
+
+
+** Always specify angles in Optical in degrees **

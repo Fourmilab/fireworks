@@ -42,6 +42,29 @@
 
     integer toggle = FALSE;             // Touch toggle
 
+    integer TYPE_ANGLE = 7;         /* We distinguish angles from floats
+                                       in order to apply angleScale to them */
+
+    list keywords = [
+        "pf", PSYS_PART_FLAGS, TYPE_INTEGER, "sp", PSYS_SRC_PATTERN, TYPE_INTEGER,
+        "sbrad", PSYS_SRC_BURST_RADIUS, TYPE_FLOAT, "sab", PSYS_SRC_ANGLE_BEGIN, TYPE_ANGLE,
+        "sae", PSYS_SRC_ANGLE_END, TYPE_ANGLE, "stk", PSYS_SRC_TARGET_KEY, TYPE_KEY,
+        "psc", PSYS_PART_START_COLOR, TYPE_VECTOR, "pec", PSYS_PART_END_COLOR, TYPE_VECTOR,
+        "psa", PSYS_PART_START_ALPHA, TYPE_FLOAT, "pea", PSYS_PART_END_ALPHA, TYPE_FLOAT,
+        "pss", PSYS_PART_START_SCALE, TYPE_VECTOR, "pes", PSYS_PART_END_SCALE, TYPE_VECTOR,
+        "st", PSYS_SRC_TEXTURE, TYPE_STRING, "psg", PSYS_PART_START_GLOW, TYPE_FLOAT,
+        "peg", PSYS_PART_END_GLOW, TYPE_FLOAT,
+        "pbfs", PSYS_PART_BLEND_FUNC_SOURCE, TYPE_INTEGER,
+        "pbfd", PSYS_PART_BLEND_FUNC_DEST, TYPE_INTEGER,
+        "sma", PSYS_SRC_MAX_AGE, TYPE_FLOAT, "pma", PSYS_PART_MAX_AGE, TYPE_FLOAT,
+        "sbrat", PSYS_SRC_BURST_RATE, TYPE_FLOAT,
+        "sbpc", PSYS_SRC_BURST_PART_COUNT, TYPE_INTEGER,
+        "sa", PSYS_SRC_ACCEL, TYPE_VECTOR, "so", PSYS_SRC_OMEGA, TYPE_VECTOR,
+        "sbsmin", PSYS_SRC_BURST_SPEED_MIN, TYPE_FLOAT,
+        "sbsmax", PSYS_SRC_BURST_SPEED_MAX, TYPE_FLOAT,
+        "sab", PSYS_SRC_INNERANGLE, "sae", PSYS_SRC_OUTERANGLE  // Deprecated, replaced
+    ];
+
     //  tawk  --  Send a message to the interacting user in chat
 
     tawk(string msg) {
@@ -226,6 +249,50 @@
                 }
             }
 
+        //  Rule mnemonic value     Define or change rule in loaded definition
+
+        } else if (abbrP(command, "ru")) {
+            integer n = llListFindList(keywords, [ sparam ]);
+            if (n >= 0) {
+                integer rnum = llList2Integer(keywords, n + 1);
+                integer rtype = llList2Integer(keywords, n + 2);
+
+                string svalue = llList2String(args, 2);
+                list rule_val = [ rnum ];
+                if (rtype == TYPE_INTEGER) {
+                    rule_val += (integer) svalue;
+                } else if ((rtype == TYPE_FLOAT) ||
+                           (rtype == TYPE_ANGLE)) {
+                    rule_val += (float) svalue;
+                } else if (rtype == TYPE_STRING) {
+                    rule_val += svalue;
+                } else if (rtype == TYPE_KEY) {
+                    rule_val += (key) svalue;
+                } else if (rtype == TYPE_VECTOR) {
+                    rule_val += (vector) svalue;
+                } else {
+tawk("Blooie!  Unknown type " + (string) rtype +
+    " for rule " + (string) rnum);
+                }
+
+                integer m = llGetListLength(psys);
+                integer i;
+                for (i = 0; i < m; i += 2) {
+                    if (llList2Integer(psys, i) == rnum) {
+                        psys = llListReplaceList(psys, rule_val, i, i + 1);
+tawk("Updated rule " + (string) rnum + " at index " + (string) i);
+                        jump rupatched;
+                    }
+                }
+                //  Rule not present in system.  Append it to the end
+                psys += rule_val;
+tawk("Appended rule " + (string) rnum + " at index " + (string) i);
+@rupatched;
+                effEncode();
+            } else {
+                tawk("Unknown rule.");
+                return FALSE;
+            }
 
         //  Set                     Set parameter
 
@@ -347,29 +414,6 @@
                 PSYS_SRC_ACCEL, <0.00, 0.00, 1.14>];
     }
 */
-
-    integer TYPE_ANGLE = 7;         /* We distinguish angles from floats
-                                       in order to apply angleScale to them */
-
-    list keywords = [
-        "pf", PSYS_PART_FLAGS, TYPE_INTEGER, "sp", PSYS_SRC_PATTERN, TYPE_INTEGER,
-        "sbrad", PSYS_SRC_BURST_RADIUS, TYPE_FLOAT, "sab", PSYS_SRC_ANGLE_BEGIN, TYPE_ANGLE,
-        "sae", PSYS_SRC_ANGLE_END, TYPE_ANGLE, "stk", PSYS_SRC_TARGET_KEY, TYPE_KEY,
-        "psc", PSYS_PART_START_COLOR, TYPE_VECTOR, "pec", PSYS_PART_END_COLOR, TYPE_VECTOR,
-        "psa", PSYS_PART_START_ALPHA, TYPE_FLOAT, "pea", PSYS_PART_END_ALPHA, TYPE_FLOAT,
-        "pss", PSYS_PART_START_SCALE, TYPE_VECTOR, "pes", PSYS_PART_END_SCALE, TYPE_VECTOR,
-        "st", PSYS_SRC_TEXTURE, TYPE_STRING, "psg", PSYS_PART_START_GLOW, TYPE_FLOAT,
-        "peg", PSYS_PART_END_GLOW, TYPE_FLOAT,
-        "pbfs", PSYS_PART_BLEND_FUNC_SOURCE, TYPE_INTEGER,
-        "pbfd", PSYS_PART_BLEND_FUNC_DEST, TYPE_INTEGER,
-        "sma", PSYS_SRC_MAX_AGE, TYPE_FLOAT, "pma", PSYS_PART_MAX_AGE, TYPE_FLOAT,
-        "sbrat", PSYS_SRC_BURST_RATE, TYPE_FLOAT,
-        "sbpc", PSYS_SRC_BURST_PART_COUNT, TYPE_INTEGER,
-        "sa", PSYS_SRC_ACCEL, TYPE_VECTOR, "so", PSYS_SRC_OMEGA, TYPE_VECTOR,
-        "sbsmin", PSYS_SRC_BURST_SPEED_MIN, TYPE_FLOAT,
-        "sbsmax", PSYS_SRC_BURST_SPEED_MAX, TYPE_FLOAT,
-        "sab", PSYS_SRC_INNERANGLE, "sae", PSYS_SRC_OUTERANGLE  // Deprecated, replaced
-    ];
 
     //  ef  --  Edit floats in string to parsimonious representation
 

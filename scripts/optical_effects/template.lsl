@@ -98,5 +98,4 @@
                     llList2Json(JSON_ARRAY, [ effect_name ] + effect_list), id);
             }
         }
-
     }
