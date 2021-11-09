@@ -490,5 +490,23 @@ It makes snowflakes (a known texture accessible via UUID) which radiate
 outward and then fall toward the ground.  This is a preliminary version
 which can benefit from from experimentation and refinement.
 
+2021 November 8
 
-** Always specify angles in Optical in degrees **
+Added logic to the Rule command in the Optical Effect Compiler so that
+rule names may be specified by their LSL defined names as well as our
+abbreviations.  The full name may be used, for example
+"PSYS_SRC_BURST_RADIUS", and upper/lower case is ignored.  You may omit
+the "PSYS_", which is common to all rule names. Only as much of the
+name needed to identify it uniquely is required.  All of the following
+would be valid: "SRC_BURST_RADIUS", "Src_burst_RAD".  "PSYS_PART_FLAGS"
+may be abbreviated to "part_f".
+
+Modified the Optical Effect Compiler and Launcher script to define
+angle specifications in Optical definitions to always be in degrees,
+regardless of Set angles mode.  This allows Optical declarations to be
+portable across products configured with different angular units
+settings.
+
+Changed the default chat command channel of the Compiler to 1982,
+which was the release year of "Star Trek II: The Wrath of Kahn", the
+first film to use a particle system effect.

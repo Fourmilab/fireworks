@@ -46,23 +46,33 @@
                                        in order to apply angleScale to them */
 
     list keywords = [
-        "pf", PSYS_PART_FLAGS, TYPE_INTEGER, "sp", PSYS_SRC_PATTERN, TYPE_INTEGER,
-        "sbrad", PSYS_SRC_BURST_RADIUS, TYPE_FLOAT, "sab", PSYS_SRC_ANGLE_BEGIN, TYPE_ANGLE,
-        "sae", PSYS_SRC_ANGLE_END, TYPE_ANGLE, "stk", PSYS_SRC_TARGET_KEY, TYPE_KEY,
-        "psc", PSYS_PART_START_COLOR, TYPE_VECTOR, "pec", PSYS_PART_END_COLOR, TYPE_VECTOR,
-        "psa", PSYS_PART_START_ALPHA, TYPE_FLOAT, "pea", PSYS_PART_END_ALPHA, TYPE_FLOAT,
-        "pss", PSYS_PART_START_SCALE, TYPE_VECTOR, "pes", PSYS_PART_END_SCALE, TYPE_VECTOR,
-        "st", PSYS_SRC_TEXTURE, TYPE_STRING, "psg", PSYS_PART_START_GLOW, TYPE_FLOAT,
-        "peg", PSYS_PART_END_GLOW, TYPE_FLOAT,
-        "pbfs", PSYS_PART_BLEND_FUNC_SOURCE, TYPE_INTEGER,
-        "pbfd", PSYS_PART_BLEND_FUNC_DEST, TYPE_INTEGER,
-        "sma", PSYS_SRC_MAX_AGE, TYPE_FLOAT, "pma", PSYS_PART_MAX_AGE, TYPE_FLOAT,
-        "sbrat", PSYS_SRC_BURST_RATE, TYPE_FLOAT,
-        "sbpc", PSYS_SRC_BURST_PART_COUNT, TYPE_INTEGER,
-        "sa", PSYS_SRC_ACCEL, TYPE_VECTOR, "so", PSYS_SRC_OMEGA, TYPE_VECTOR,
-        "sbsmin", PSYS_SRC_BURST_SPEED_MIN, TYPE_FLOAT,
-        "sbsmax", PSYS_SRC_BURST_SPEED_MAX, TYPE_FLOAT,
-        "sab", PSYS_SRC_INNERANGLE, "sae", PSYS_SRC_OUTERANGLE  // Deprecated, replaced
+        "pf", "p_f", PSYS_PART_FLAGS, TYPE_INTEGER,
+        "sp", "s_p", PSYS_SRC_PATTERN, TYPE_INTEGER,
+        "sbrad", "s_burst_rad", PSYS_SRC_BURST_RADIUS, TYPE_FLOAT,
+        "sab", "s_angle_b", PSYS_SRC_ANGLE_BEGIN, TYPE_ANGLE,
+        "sae", "s_angle_e", PSYS_SRC_ANGLE_END, TYPE_ANGLE,
+        "stk", "s_ta", PSYS_SRC_TARGET_KEY, TYPE_KEY,
+        "psc", "p_start_c", PSYS_PART_START_COLOR, TYPE_VECTOR,
+        "pec", "p_end_c", PSYS_PART_END_COLOR, TYPE_VECTOR,
+        "psa", "p_start_a", PSYS_PART_START_ALPHA, TYPE_FLOAT,
+        "pea", "p_end_a", PSYS_PART_END_ALPHA, TYPE_FLOAT,
+        "pss", "p_start_s", PSYS_PART_START_SCALE, TYPE_VECTOR,
+        "pes", "p_end_s", PSYS_PART_END_SCALE, TYPE_VECTOR,
+        "st", "s_te", PSYS_SRC_TEXTURE, TYPE_STRING,
+        "psg", "p_start_g", PSYS_PART_START_GLOW, TYPE_FLOAT,
+        "peg", "p_end_g", PSYS_PART_END_GLOW, TYPE_FLOAT,
+        "pbfs", "p_blend_func_s", PSYS_PART_BLEND_FUNC_SOURCE, TYPE_INTEGER,
+        "pbfd","p_blend_func_d",  PSYS_PART_BLEND_FUNC_DEST, TYPE_INTEGER,
+        "sma", "s_m", PSYS_SRC_MAX_AGE, TYPE_FLOAT,
+        "pma", "p_m", PSYS_PART_MAX_AGE, TYPE_FLOAT,
+        "sbrat", "s_burst_rat", PSYS_SRC_BURST_RATE, TYPE_FLOAT,
+        "sbpc", "s_burst_p", PSYS_SRC_BURST_PART_COUNT, TYPE_INTEGER,
+        "sa", "s_ac", PSYS_SRC_ACCEL, TYPE_VECTOR,
+        "so", "s_om", PSYS_SRC_OMEGA, TYPE_VECTOR,
+        "sbsmin", "s_burst_speed_mi", PSYS_SRC_BURST_SPEED_MIN, TYPE_FLOAT,
+        "sbsmax", "s_burst_speed_ma", PSYS_SRC_BURST_SPEED_MAX, TYPE_FLOAT,
+        "sab", "s_i", PSYS_SRC_INNERANGLE, TYPE_ANGLE,      // Deprecated, replaced
+        "sae", "s_ou", PSYS_SRC_OUTERANGLE, TYPE_ANGLE      // Deprecated, replaced
     ];
 
     //  tawk  --  Send a message to the interacting user in chat
@@ -254,8 +264,46 @@
         } else if (abbrP(command, "ru")) {
             integer n = llListFindList(keywords, [ sparam ]);
             if (n >= 0) {
-                integer rnum = llList2Integer(keywords, n + 1);
-                integer rtype = llList2Integer(keywords, n + 2);
+                //  Adjust to record start if we hit on long abbreviation
+                n = (n / 4) * 4;
+            } else if (llSubStringIndex(sparam, "_") >= 0) {
+                /*  Transform long rule name into the shortest
+                    unique canonical abbreviation.  We strip
+                    the leading "PSYS_", if present, abbreviate
+                    the "PART_" or "SRC_" to its first letter, and
+                    drop trailing letters not needed to
+                    disambiguate.  */
+                string lparam = sparam;
+                if (llGetSubString(lparam, 0, 4) == "psys_") {
+                    lparam = llGetSubString(lparam, 5, -1);
+                }
+                if (llGetSubString(lparam, 0, 4) == "part_") {
+                    lparam = "p_" + llGetSubString(lparam, 5, -1);
+                } else if (llGetSubString(lparam, 0, 3) == "src_") {
+                    lparam = "s_" + llGetSubString(lparam, 4, -1);
+                } else {
+                    n = 1;
+                }
+//tawk("Canonical name (" + lparam + ")");
+                if (n < 0) {
+                    integer j;
+                    integer l = llGetListLength(keywords);
+
+                    for (j = 0; j < l; j += 4) {
+                        string sname = llList2String(keywords, j + 1);
+                        integer snamel = llStringLength(sname) - 1;
+                        if (llGetSubString(lparam, 0, snamel) == sname) {
+                            n = j;
+//tawk("  Mapped to " + llList2String(keywords, j));
+                            jump foundl;
+                        }
+                    }
+                }
+            }
+@foundl;
+            if (n >= 0) {
+                integer rnum = llList2Integer(keywords, n + 2);
+                integer rtype = llList2Integer(keywords, n + 3);
 
                 string svalue = llList2String(args, 2);
                 list rule_val = [ rnum ];
@@ -280,13 +328,13 @@ tawk("Blooie!  Unknown type " + (string) rtype +
                 for (i = 0; i < m; i += 2) {
                     if (llList2Integer(psys, i) == rnum) {
                         psys = llListReplaceList(psys, rule_val, i, i + 1);
-tawk("Updated rule " + (string) rnum + " at index " + (string) i);
+//tawk("Updated rule " + (string) rnum + " at index " + (string) i);
                         jump rupatched;
                     }
                 }
                 //  Rule not present in system.  Append it to the end
                 psys += rule_val;
-tawk("Appended rule " + (string) rnum + " at index " + (string) i);
+//tawk("Appended rule " + (string) rnum + " at index " + (string) i);
 @rupatched;
                 effEncode();
             } else {
@@ -608,8 +656,8 @@ tawk("Appended rule " + (string) rnum + " at index " + (string) i);
             }
 
             integer j;
-            for (j = 0; j < m; j += 3) {
-                if (llList2Integer(keywords, j + 1) == rule) {
+            for (j = 0; j < m; j += 4) {
+                if (llList2Integer(keywords, j + 2) == rule) {
                     jump cazart;
                 }
             }
@@ -620,7 +668,7 @@ tawk("Appended rule " + (string) rnum + " at index " + (string) i);
             return;
 @cazart;
             string spec = " " + llList2String(keywords, j) + " ";
-            integer tl = llList2Integer(keywords, j + 2);
+            integer tl = llList2Integer(keywords, j + 3);
             string ts;
             if (tl == TYPE_INTEGER) {
                 ts = (string) Vi;
