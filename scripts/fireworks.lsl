@@ -35,6 +35,13 @@
     integer scriptSuspend = FALSE;  // Suspend script execution for asynchronous event
     integer waitingShells = FALSE;  // Waiting for all shells to be idle
 
+    //  Group clip play
+
+    integer gloading = 0;           // Group loading in progesss
+    integer gloaded = FALSE;        // Is a group of clips loaded ?
+    integer gplaying = FALSE;       // Are we playing a sequence of clips ?
+    integer gwaiting = FALSE;       // Are we waiting for a load or play to complete ?
+
     string configScript = "Script: Configuration";
     string helpFileName = "Fourmilab Fireworks User Guide";
 
@@ -70,6 +77,15 @@
     integer LM_SP_READY = 57;           // Script ready to read
     integer LM_SP_ERROR = 58;           // Requested operation failed
     integer LM_SP_SETTINGS = 59;        // Set operating modes
+
+    //  Queued sound player messages
+//    integer LM_QP_RESET = 81;           // Reset script
+//    integer LM_QP_STAT = 82;            // Print status
+    integer LM_QP_LOAD = 83;            // Preload clips to play
+    integer LM_QP_PLAY = 84;            // Play clips
+    integer LM_QP_STOP = 85;            // Stop current clip
+    integer LM_QP_DONE = 86;            // Notify play complete
+    integer LM_QP_LOADED = 87;          // Notify clips loaded
 
     //  Firework shell messages
     integer LM_FS_LAUNCH = 90;          // Launch shell
@@ -301,7 +317,7 @@
             } else if (atype == TYPE_FLOAT) {
                 rules += [ (float) val ];
             } else if (atype == TYPE_ANGLE) {
-                rules += [ ((float) val) * angleScale ];
+                rules += [ ((float) val) * DEG_TO_RAD ];
             } else if (atype == TYPE_KEY) {
                 rules += [ (key) val ];
             } else if (atype == TYPE_VECTOR) {
@@ -550,6 +566,75 @@
                 dictValue = "";
             }
             llMessageLinked(lBrim, LM_FS_MEDIA, dictValue, whoDat);
+
+        //  Gload gname             Load a group containing a sequence of audio clips
+
+        } else if (abbrP(command, "gl")) {
+            if (gloading || gplaying) {
+                tawk("Gload/Gplay busy");
+                return FALSE;
+            }
+            integer di = dictLook(sparam);
+            if (di >= 0) {
+                list clist = [ ];
+                integer i;
+                list dl = llJson2List(llList2String(dictvalues, di));
+                integer dln = llGetListLength(dl);
+
+                for (i = 0; i < dln; i++) {
+                    float ctime = 10;
+                    string sname = llList2String(dl, i);
+
+                    if (llGetInventoryType(sname) == INVENTORY_SOUND) {
+                        clist += llGetInventoryKey(sname);
+                        if ((i + 1) < dln) {
+                            string pt = llList2String(dl, i + 1);
+                            if ((llGetSubString(pt, 0, 0) == "[") &&
+                                (llGetSubString(pt, -1, -1) == "]")) {
+                                ctime = (float) llGetSubString(pt, 1, -2);
+                                i++;
+                            }
+                        }
+                        clist += ctime;
+                    }
+                }
+                llMessageLinked(lBrim, LM_QP_LOAD,
+                    llList2Json(JSON_ARRAY, clist), whoDat);
+                gloading = TRUE;                // Mark load in progress
+                gloaded = FALSE;                // Load incomplete
+tawk(llList2CSV(clist));
+            }
+
+        //  Gplay volume/stop           Play the loaded group of clips
+
+        } else if (abbrP(command, "gp")) {
+            if (abbrP(sparam, "st")) {
+                llMessageLinked(lBrim, LM_QP_STOP, "", whoDat);
+            } else {
+                if (gplaying) {
+                    tawk("Clips already playing.");
+                    return FALSE;
+                }
+                float volume = 10;
+                if (argn >= 2) {
+                    volume = (float) sparam;
+                }
+                if (gloaded) {
+                    llMessageLinked(lBrim, LM_QP_PLAY, (string) volume, whoDat);
+                    gplaying = TRUE;
+                } else {
+                    tawk("No group of clips loaded.");
+                    return FALSE;
+                }
+            }
+
+        //  Gwait                   Wait for group load or play to complete
+
+        } else if (abbrP(command, "gw")) {
+            if (gloading || gplaying) {
+                scriptSuspend = TRUE;
+                gwaiting = TRUE;
+            }
 
         //  Group gname member1 member2...  Define a group of objects
 
@@ -919,6 +1004,21 @@
                 scriptActive = scriptSuspend = FALSE;
                 llMessageLinked(LINK_THIS, LM_SP_INIT, "", id);
 
+            //  LM_QP_LOADED (87): Group sound clips loaded
+
+            } else if (num == LM_QP_LOADED) {
+llOwnerSay("Sound clips loaded.");
+                gloading = FALSE;
+                gloaded = TRUE;
+                if (gwaiting) {
+                    scriptResume();
+                }
+            } else if (num == LM_QP_DONE) {
+llOwnerSay("Sound clips done.");
+                gplaying = FALSE;
+                if (gwaiting) {
+                    scriptResume();
+                }
             }
         }
 
