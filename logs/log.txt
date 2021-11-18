@@ -510,3 +510,45 @@ settings.
 Changed the default chat command channel of the Compiler to 1982,
 which was the release year of "Star Trek II: The Wrath of Kahn", the
 first film to use a particle system effect.
+
+2021 November 17
+
+Added the first draft of the Group Sound Play capability.  This uses
+the new Queued Sound Player in the player brim to play arbitrarily long
+sound clips composed of multiple chunks which do not exceed the Second
+Life 10 second limit.  The sound clips are first declared with an Audio
+command as usual, and can be either clips in the launcher's inventory
+or UUIDs accessible on the grid.  These clips are then listed in order
+in a Group declaration.  The clips are assumed to be 10 seconds in
+length unless followed by a length declaration in the form “[len]”
+where len is the length in seconds.  For example, to declare a sequence
+of clips which run for 24.7 seconds, one might use:
+    Group mymusic mymusic_1 mymusic_2 mymusic_3 [4.7]
+
+With the group of clips declared, the initial clips are loaded with the
+command:
+    Gload mymusic
+As the clips must be loaded into the viewers of avatars in the vicinity
+of the launcher, it's a good idea to wait for several seconds after
+issuing the Gload command before playing them.
+
+After the clips have been loaded, they are played with the command:
+    Gplay <volume>
+which starts them playing in sequence with the specified volume,
+defaulting to 10 (maximum volume, long range) if not specified.  If
+“Gplay stop” is issued, any in-progress playing of clips is immediately
+terminated.
+
+To make a script wait until a Gload or Gplay command completes, use the
+    Gwait
+command.  Note that there is no automatic wait for these commands to
+complete.  This allows you, for example, to start a Gplay and then
+run subsequent Salvo and Launch commands for a show to accompany the
+sound track.
+
+Added the ability to specify a salvo by its duration in seconds as well
+as the number of shots.  The command:
+    Salvo -seconds
+will continue to salvo shells until seconds have elapsed.  All of the
+other salvo settings will continue to apply, including Set interval,
+which sets the range of time between launches.

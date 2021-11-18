@@ -204,6 +204,7 @@
     //  salvo  --  Fire a salvo of multiple launches
 
     integer salvoCount = 0;             // Shots remaining in salvo
+    float salvoEnd = 0;                 // Salvo end time (llGetTime() value)
     float salvoTime = 0;                // Time of next shot
     list salvoArgs;                     // Arguments for launch command
 
@@ -211,6 +212,11 @@
 @salvoNext;
         integer ok = processCommand(whoDat,
             "LaSalvo:" + (string) salvoCount, 2);
+        //  If we've reached the end of a timed salvo, stop it
+        if ((salvoEnd > 0) && (llGetTime() > salvoEnd)) {
+            salvoEnd = 0;
+            salvoCount = 0;
+        }
         salvoCount--;
         float nextTime;
         if (ok && (salvoCount > 0)) {
@@ -749,7 +755,7 @@ tawk(llList2CSV(clist));
                 salvoTime = 0;
                 salvoCount = 0;
             } else {
-                if (salvoCount > 0) {
+                if ((salvoCount > 0) && (howmany > 0)) {
                     //  If salvo in progress, add argument to count
                     salvoCount += howmany;
                 } else {
@@ -759,7 +765,12 @@ tawk(llList2CSV(clist));
                     } else {
                         salvoArgs = [ ];
                     }
-                    salvoCount = howmany;
+                    if (howmany > 0) {
+                        salvoCount = howmany;
+                    } else {
+                        salvoEnd = llGetTime() - ((float) sparam);
+                        salvoCount = (1 << 31) - 1;
+                    }
                     salvo();
                 }
             }
