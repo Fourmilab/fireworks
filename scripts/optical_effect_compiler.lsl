@@ -1,11 +1,10 @@
 /*
 
-                        Fourmilab Fireworks
-                       Optical Effect Compiler
+                Fourmilab Optical Effect Compiler
 
     This program takes a list defining a LSL llParticleSystem()
     definition and translates it into equivalent Optical
-    declarations for Fourmilab Fireworks.  Simply write a
+    declarations for Fourmilab products.  Simply write a
     function modeled on the ones embedded below to define
     your particle system and recompile the script.  As soon
     as it runs, it will output the Optical declarations for
@@ -18,14 +17,16 @@
 
     key owner;                      // Owner UUID
 
-    integer commandChannel = 1750;  /* Command channel in chat */
+    integer commandChannel = 1982;  /* Command channel in chat (release year
+                                       of "Star Trek II", first cinematic use
+                                       of particle system effects) */
     integer commandH;               // Handle for command channel
     key whoDat = NULL_KEY;          // Avatar who sent command
     integer restrictAccess = 0;     // Access restriction: 0 none, 1 group, 2 owner
     integer echo = TRUE;            // Echo chat and script commands ?
     float angleScale = DEG_TO_RAD;  // Scale factor for angles
 
-    string helpFileName = "Fourmilab Fireworks User Guide";
+    string helpFileName = "Fourmilab Optical Effect User Guide";
 
     //  Compiler messages
     integer LM_OC_REQUEST = 300;                // Request effect definition
@@ -40,10 +41,12 @@
 
     vector lastHSV;
 
-    integer toggle = FALSE;             // Touch toggle
+    integer toggle = FALSE;         // Touch toggle
 
     integer TYPE_ANGLE = 7;         /* We distinguish angles from floats
-                                       in order to apply angleScale to them */
+                                       in order to convert radians in
+                                       particle system definitions to
+                                       degrees in Optical declarations. */
 
     list keywords = [
         "pf", "p_f", PSYS_PART_FLAGS, TYPE_INTEGER,
@@ -284,7 +287,6 @@
                 } else {
                     n = 1;
                 }
-//tawk("Canonical name (" + lparam + ")");
                 if (n < 0) {
                     integer j;
                     integer l = llGetListLength(keywords);
@@ -294,7 +296,6 @@
                         integer snamel = llStringLength(sname) - 1;
                         if (llGetSubString(lparam, 0, snamel) == sname) {
                             n = j;
-//tawk("  Mapped to " + llList2String(keywords, j));
                             jump foundl;
                         }
                     }
@@ -328,13 +329,11 @@ tawk("Blooie!  Unknown type " + (string) rtype +
                 for (i = 0; i < m; i += 2) {
                     if (llList2Integer(psys, i) == rnum) {
                         psys = llListReplaceList(psys, rule_val, i, i + 1);
-//tawk("Updated rule " + (string) rnum + " at index " + (string) i);
                         jump rupatched;
                     }
                 }
                 //  Rule not present in system.  Append it to the end
                 psys += rule_val;
-//tawk("Appended rule " + (string) rnum + " at index " + (string) i);
 @rupatched;
                 effEncode();
             } else {
@@ -347,20 +346,9 @@ tawk("Blooie!  Unknown type " + (string) rtype +
         } else if (abbrP(command, "se")) {
             string svalue = llList2String(args, 2);
 
-            //  Set angles degrees/radians  Set angle input to degrees or radians
-
-            if (abbrP(sparam, "an")) {
-                if (abbrP(svalue, "d")) {
-                    angleScale = DEG_TO_RAD;
-                } else if (abbrP(svalue, "r")) {
-                    angleScale = 1;
-                } else {
-                    tawk("Invalid set angle.  Valid: degree, radian.");
-                }
-
                 //  Set echo on/off
 
-                } else if (abbrP(sparam, "ec")) {
+                if (abbrP(sparam, "ec")) {
                     echo = onOff(svalue);
 
                 } else {
@@ -387,82 +375,6 @@ tawk("Blooie!  Unknown type " + (string) rtype +
         return TRUE;
     }
 
-/*
-    //  Spiral ejection of crystals, which rise upward
-
-    crystals() {
-        psname = "fwspiral";
-        psys = [
-                PSYS_PART_FLAGS, PSYS_PART_INTERP_COLOR_MASK |
-                                 PSYS_PART_EMISSIVE_MASK |
-                                 PSYS_PART_FOLLOW_VELOCITY_MASK ,
-                PSYS_SRC_PATTERN, PSYS_SRC_PATTERN_ANGLE,
-                PSYS_SRC_MAX_AGE, 1.5,
-                PSYS_PART_MAX_AGE, 1.5,
-                PSYS_SRC_BURST_SPEED_MIN, 1,
-                PSYS_SRC_BURST_SPEED_MAX, 2,
-                PSYS_SRC_ACCEL, <0, 0, 0.2>,
-                PSYS_SRC_BURST_RATE, 0.05,
-                PSYS_SRC_BURST_PART_COUNT, 10,
-                PSYS_SRC_ANGLE_BEGIN,  0,
-                PSYS_SRC_ANGLE_END, 90 * DEG_TO_RAD,
-                PSYS_SRC_OMEGA, <0, 0, 20>,
-                PSYS_PART_START_SCALE, <0.25, 0.25, 0.0>,
-                PSYS_PART_START_ALPHA, 1.0,
-                PSYS_PART_END_ALPHA, 0.5,
-                PSYS_SRC_TEXTURE, "181c6b1d-c2d0-70ba-bbf2-52ccc31687c6"
-        ];
-    }
-
-    //  Rain falling down from above
-    rain() {
-        psname = "rain";
-        psys = [PSYS_PART_MAX_AGE,1.20,
-                PSYS_PART_FLAGS, 259,
-                PSYS_PART_START_COLOR, <0.73, 0.84, 0.79>,
-                PSYS_PART_END_COLOR, <0.61, 0.76, 0.82>,
-                PSYS_PART_START_SCALE,<0.10, 0.00, 0.00>,
-                PSYS_PART_END_SCALE,<0.10, 3.69, 0.00>,
-                PSYS_SRC_PATTERN, 8,
-                PSYS_SRC_BURST_RATE,0.10,
-                PSYS_SRC_BURST_PART_COUNT,25,
-                PSYS_SRC_BURST_RADIUS,5.57,
-                PSYS_SRC_BURST_SPEED_MIN,0.11,
-                PSYS_SRC_BURST_SPEED_MAX,0.64,
-                PSYS_SRC_ANGLE_BEGIN, 0.00,
-                PSYS_SRC_ANGLE_END, 0.78,
-                PSYS_SRC_MAX_AGE, 0.0,
-                PSYS_SRC_TEXTURE, "06675bc5-e9b9-0557-7179-fbf7779faed8",
-                PSYS_PART_START_ALPHA, 0.20,
-                PSYS_PART_END_ALPHA, 0.75,
-                PSYS_SRC_ACCEL, <-0.37, 0.45, -12.00>];
-    }
-
-    //  Dark smoke rising from a fire
-    smoke() {
-        psname = "smoke";
-        psys = [PSYS_PART_MAX_AGE,2.50,
-                PSYS_PART_FLAGS, 259,
-                PSYS_PART_START_COLOR, <0.18, 0.16, 0.13>,
-                PSYS_PART_END_COLOR, <0.59, 0.65, 0.62>,
-                PSYS_PART_START_SCALE,<0.15, 0.15, 0.00>,
-                PSYS_PART_END_SCALE,<0.77, 1.21, 0.00>,
-                PSYS_SRC_PATTERN, 2,
-                PSYS_SRC_BURST_RATE,0.00,
-                PSYS_SRC_BURST_PART_COUNT,4,
-                PSYS_SRC_BURST_RADIUS,0.00,
-                PSYS_SRC_BURST_SPEED_MIN,0.07,
-                PSYS_SRC_BURST_SPEED_MAX,0.35,
-                PSYS_SRC_ANGLE_BEGIN, 1.65,
-                PSYS_SRC_ANGLE_END, 0.00,
-                PSYS_SRC_MAX_AGE, 0.0,
-                PSYS_SRC_TEXTURE, "006d9758-81da-38a9-9be3-b6c941cae931",
-                PSYS_PART_START_ALPHA, 0.40,
-                PSYS_PART_END_ALPHA, 0.00,
-                PSYS_SRC_ACCEL, <0.00, 0.00, 1.14>];
-    }
-*/
-
     //  ef  --  Edit floats in string to parsimonious representation
 
     string efv(vector v) {
@@ -476,12 +388,6 @@ tawk("Blooie!  Unknown type " + (string) rtype +
     string efa(float a) {
         return ef((string) (a / angleScale));
     }
-
-/*
-    string efr(rotation r) {
-        return efv(llRot2Euler(r) * RAD_TO_DEG);
-    }
-*/
 
     //  Static constants to avoid costly allocation
     string efkdig = "0123456789";
@@ -576,7 +482,6 @@ tawk("Blooie!  Unknown type " + (string) rtype +
         } else if (i == 5) {
             return < v, p, q >;
         }
-//llOwnerSay("Blooie!  " + (string) hsv);
         return < 0, 0, 0 >;
     }
 
@@ -701,7 +606,7 @@ tawk("Blooie!  Unknown type " + (string) rtype +
             llSetTexture("fireworks_512", ALL_SIDES);
             llSetAlpha(1, ALL_SIDES);
             llSetLinkPrimitiveParamsFast(LINK_THIS,
-                [ PRIM_TEXT, "Fourmilab Fireworks\nOptical Effect Compiler", <0, 1, 0>, 1 ]);
+                [ PRIM_TEXT, "Fourmilab Optical Effect Compiler", <0, 1, 0>, 1 ]);
             llParticleSystem([ ]);          // Clear any orphaned particle system
 
             //  Start listening on the command chat channel
@@ -727,12 +632,10 @@ tawk("Blooie!  Unknown type " + (string) rtype +
         link_message(integer sender, integer num, string str, key id) {
             if (num == LM_OC_REPLY) {
                 llSetTimerEvent(0);     // Clear no-response timeout
-//tawk("Eff: " + str);
                 list l = llJson2List(str);
                 psname = llList2String(l, 0);
                 l = llDeleteSubList(l, 0, 0);
                 psys = psDecodeBasic(l);
-//tawk("Dec: " + llList2CSV(psys));
                 effEncode();
             }
         }
