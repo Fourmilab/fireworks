@@ -48,7 +48,7 @@ CHAT COMMANDS
 Fourmilab Fireworks accepts commands submitted on local chat channel
 1749 (the date of composition of George Frideric Handel's Music for the
 Royal Fireworks, HWV 351) and responds in local chat.  Commands are as
-follow.  (Most chat commands and parameters, except those specifying
+follows.  (Most chat commands and parameters, except those specifying
 names from the inventory, may be abbreviated to as few as two
 characters and are insensitive to upper and lower case.)
 
@@ -171,9 +171,14 @@ characters and are insensitive to upper and lower case.)
         Launch command.  If a Salvo command is entered while a previous
         salvo is in progress, if n is 0 the Salvo is cancelled.
         Otherwise, the number is added to the number remaining from the
-        in-progress salvo.  The optional arguments following the number
-        of shells to launch are the same as on the Launch command and
-        will be used for all launches in the salvo.
+        in-progress salvo.  If n is negative, it is taken as the
+        duration of the salvo in seconds: shells will be continued to
+        be launched at the specified “Set interval” range until the
+        specified time has elapsed.  Timed salvos are particularly
+        useful when you wish to synchronise fireworks with sound clips.
+        The optional arguments following the number of shells to launch
+        are the same as on the Launch command and will be used for all
+        launches in the salvo.
 
     Script
         These commands control the running of scripts stored in
