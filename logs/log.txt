@@ -552,3 +552,19 @@ as the number of shots.  The command:
 will continue to salvo shells until seconds have elapsed.  All of the
 other salvo settings will continue to apply, including Set interval,
 which sets the range of time between launches.
+
+2021 November 22
+
+There were circumstances in which rebooting the launcher while the top
+was open could result in the top's position being lost after the
+restart.  To avoid this, I just hard-coded the proper position of
+repose of the top in the main script.  I added code to state_entry()
+to restore this position if necessary when the script is reset for
+whatever reason.
+
+2021 November 23
+
+Added the ability to delete multiple dictionary objects with the Delete
+command.  Any number of objects may be specified on one command.
+
+** Reset position of top if CHANGED_SCALE received in root prim.

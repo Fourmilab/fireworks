@@ -46,7 +46,7 @@
     string helpFileName = "Fourmilab Fireworks User Guide";
 
     integer lTop;                   // Fireworks top link number
-    vector pTop;                    // Fireworks top local position
+    vector pTop = <0, 0, 0.09581>;  // Fireworks top local position
     integer lBrim;                  // Fireworks bottom link number
     list aShells;                   // Available (ready to launch) shells
     integer nShells;                // Number of firework shells
@@ -541,14 +541,17 @@
         } else if (abbrP(command, "cl")) {
             tawk("\n\n\n\n\n\n\n\n\n\n\n\n\n");
 
-        //  Delete name             Delete name from dictionary
+        //  Delete name...          Delete name from dictionary
 
         } else if (abbrP(command, "de")) {
-            integer di = dictLook(sparam);
-            if (di >= 0) {
-                integer dx = di * 2;
-                dictionary = llDeleteSubList(dictionary, dx, dx + 1);
-                dictvalues = llDeleteSubList(dictvalues, di, di);
+            integer i;
+            for (i = 1; i < argn; i++) {
+                integer di = dictLook(llList2String(args, i));
+                if (di >= 0) {
+                    integer dx = di * 2;
+                    dictionary = llDeleteSubList(dictionary, dx, dx + 1);
+                    dictvalues = llDeleteSubList(dictvalues, di, di);
+                }
             }
 
         //  Echo text               Send text to sender
@@ -608,7 +611,7 @@
                     llList2Json(JSON_ARRAY, clist), whoDat);
                 gloading = TRUE;                // Mark load in progress
                 gloaded = FALSE;                // Load incomplete
-tawk(llList2CSV(clist));
+//tawk(llList2CSV(clist));
             }
 
         //  Gplay volume/stop           Play the loaded group of clips
@@ -907,7 +910,7 @@ tawk(llList2CSV(clist));
             whoDat = owner = llGetOwner();
 
             lTop = findLinkNumber("Fireworks Top");
-            pTop = llList2Vector(llGetLinkPrimitiveParams(lTop, [ PRIM_POS_LOCAL ]), 0);
+//            pTop = llList2Vector(llGetLinkPrimitiveParams(lTop, [ PRIM_POS_LOCAL ]), 0);
             lBrim = findLinkNumber("Fireworks Bottom");
 
             elevMin = PI / 4;               // Set minimum elevation to 45 degrees
@@ -928,6 +931,9 @@ tawk(llList2CSV(clist));
 
             //  Cancel any orphaned particle system
             llParticleSystem([ ]);
+
+            //  Close the top if it's open
+            tipTop(FALSE);
 
             //  Start listening on the command chat channel
             commandH = llListen(commandChannel, "", NULL_KEY, "");
