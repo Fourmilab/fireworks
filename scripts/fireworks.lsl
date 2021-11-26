@@ -46,7 +46,8 @@
     string helpFileName = "Fourmilab Fireworks User Guide";
 
     integer lTop;                   // Fireworks top link number
-    vector pTop = <0, 0, 0.09581>;  // Fireworks top local position
+    vector pTop;                    // Fireworks top local position
+    vector szTop;                   // Fireworks top size
     integer lBrim;                  // Fireworks bottom link number
     list aShells;                   // Available (ready to launch) shells
     integer nShells;                // Number of firework shells
@@ -184,13 +185,22 @@
         return "";
     }
 
+    //  saveTop  -- Save initial position and size of top
+
+    saveTop() {
+        list tl = llGetLinkPrimitiveParams(lTop,
+            [ PRIM_POS_LOCAL, PRIM_SIZE ]);
+        pTop = llList2Vector(tl, 0);
+        szTop = llList2Vector(tl, 1);
+    }
+
     //  tipTop  -- Tip the top of the hat
 
     tipTop(integer open) {
         llMessageLinked(lTop, LM_FS_OPEN, (string) open, whoDat);
         if (open) {
             llSetLinkPrimitiveParamsFast(lTop,
-                [ PRIM_POS_LOCAL, pTop + <0, -0.1, 0.1>,
+                [ PRIM_POS_LOCAL, pTop + (<0, -szTop.y, szTop.y> / 2),
                   PRIM_ROT_LOCAL, llEuler2Rot(<PI_BY_TWO, 0, 0>)
                 ]);
         } else {
@@ -519,6 +529,8 @@
         //  Boot                    Reset the script to initial settings
 
         } else if (abbrP(command, "bo")) {
+            tipTop(FALSE);
+            llSleep(0.25);
             llResetScript();
 
         /*  Channel n               Change command channel.  Note that
@@ -611,7 +623,6 @@
                     llList2Json(JSON_ARRAY, clist), whoDat);
                 gloading = TRUE;                // Mark load in progress
                 gloaded = FALSE;                // Load incomplete
-//tawk(llList2CSV(clist));
             }
 
         //  Gplay volume/stop           Play the loaded group of clips
@@ -910,7 +921,7 @@
             whoDat = owner = llGetOwner();
 
             lTop = findLinkNumber("Fireworks Top");
-//            pTop = llList2Vector(llGetLinkPrimitiveParams(lTop, [ PRIM_POS_LOCAL ]), 0);
+            saveTop();
             lBrim = findLinkNumber("Fireworks Bottom");
 
             elevMin = PI / 4;               // Set minimum elevation to 45 degrees
@@ -931,9 +942,6 @@
 
             //  Cancel any orphaned particle system
             llParticleSystem([ ]);
-
-            //  Close the top if it's open
-            tipTop(FALSE);
 
             //  Start listening on the command chat channel
             commandH = llListen(commandChannel, "", NULL_KEY, "");
@@ -1024,14 +1032,14 @@
             //  LM_QP_LOADED (87): Group sound clips loaded
 
             } else if (num == LM_QP_LOADED) {
-llOwnerSay("Sound clips loaded.");
+//llOwnerSay("Sound clips loaded.");
                 gloading = FALSE;
                 gloaded = TRUE;
                 if (gwaiting) {
                     scriptResume();
                 }
             } else if (num == LM_QP_DONE) {
-llOwnerSay("Sound clips done.");
+//llOwnerSay("Sound clips done.");
                 gplaying = FALSE;
                 if (gwaiting) {
                     scriptResume();
@@ -1061,6 +1069,14 @@ llOwnerSay("Sound clips done.");
         touch_start(integer howmany) {
             if (llGetInventoryType("Script: Touch") == INVENTORY_NOTECARD) {
                 processCommand(llDetectedKey(0), "Script run Touch", FALSE);
+            }
+        }
+
+        //  If launcher rescaled, update position and size of top
+
+        changed(integer what) {
+            if (what & CHANGED_SCALE) {
+                saveTop();
             }
         }
     }

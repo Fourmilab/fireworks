@@ -567,4 +567,17 @@ whatever reason.
 Added the ability to delete multiple dictionary objects with the Delete
 command.  Any number of objects may be specified on one command.
 
-** Reset position of top if CHANGED_SCALE received in root prim.
+2021 November 26
+
+The mechanism for opening and closing the top of the launcher did not
+work if the launcher was rescaled, and could lose the position of the
+top if the script was reset while it was open.  I added code to save
+the position and size of the top in state_entry(), then make the
+position changes when opening and closing relative to them.  When we
+receive the changed() event with a CHANGED_SCALE status, we update this
+information so subsequent tips of the top work correctly.  Finally,
+before resetting the script in a Boot command, we close the top if it's
+open.  It is still possible to mess things up by, for example,
+resetting the script from the viewer with the top open, which provides
+us no notification of the event, but in almost all likely circumstances
+this should keep us out of trouble.
