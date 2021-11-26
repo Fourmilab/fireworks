@@ -59,17 +59,18 @@ characters and are insensitive to upper and lower case.)
 
     Audio sound[=UUID] ...
         Declare one or more sound clips to be used for launch and burst
-        sound effects or the Play command.  An audio clip can either be
-        in the inventory of the fireworks launcher or specified as the
-        UUID/key of a publicly accessible sound clip elsewhere on the
-        Second Life grid.  Sound clips specified by UUID are given a
-        name with the UUID followed by an equal sign.  For example, to
-        use the built-in thunder sound, you could declare: Audio
-        thunder=e95c96a5-293c-bb7a-57ad-ce2e785ad85f and then specify
-        “thunder” on a Launch command or in the declaration of a group
-        of explosion sounds.  All sound names, whether from the
-        inventory or by UUID, must use only lower case letters and
-        inventory sound clip names must be identical.
+        sound effects or the Play/Gload/Gplay commands.  An audio clip
+        can either be in the inventory of the fireworks launcher or
+        specified as the UUID/key of a publicly accessible sound clip
+        elsewhere on the Second Life grid.  Sound clips specified by
+        UUID are given a name with the UUID followed by an equal sign.
+        For example, to use the built-in thunder sound, you could
+        declare:
+            Audio thunder=e95c96a5-293c-bb7a-57ad-ce2e785ad85f
+        and then specify “thunder” on a Launch command or in the
+        declaration of a group of explosion sounds.  All sound names,
+        whether from the inventory or by UUID, must use only lower case
+        letters and inventory sound clip names must be identical.
 
     Boot
         Reset the script.  All settings will be restored to their
@@ -86,14 +87,14 @@ characters and are insensitive to upper and lower case.)
         Send vertical white space to local chat to separate output when
         debugging.
 
-    Delete name
-        Delete the item (Audio, Group, Optical, or URL) with the given
-        name from the dictionary.  This can be used to reclaim space
-        when you're loading different sets of effects for shows, and is
-        particularly handy when you want to update an Optical
-        definition. The old definition must be deleted before the new
-        is declared to avoid its items being appended to the previous
-        definition.
+    Delete name ...
+        Delete one or more items (Audio, Group, Optical, or URL) with
+        the given name(s) from the dictionary.  This can be used to
+        reclaim space when you're loading different sets of effects for
+        shows, and is particularly handy when you want to update an
+        Optical definition. The old definition must be deleted before
+        the new is declared to avoid its items being appended to the
+        previous definition.
 
     Echo text
         Echo the text in local chat.  This allows scripts to send
@@ -105,12 +106,42 @@ characters and are insensitive to upper and lower case.)
         Group, from a randomly chosen member of it.  You can only have
         one audio source streaming at a time, and there is no way to
         detect whether the source is still playing.  An Embed command
-        with no name will stop the currenly playing source.
+        with no name will stop the currently playing source.
+
+    Gload gname
+        Load multiple sound clips, with optional length specifications,
+        to be played in succession by a subsequent Gplay command.  The
+        clips must be declared previous as a Group, whose name is
+        specified on the Gload command.  Clips are assumed to be ten
+        seconds in length (the maximum Second Life permits) unless
+        followed by their length in seconds surrounded by square
+        brackets.  For example, to declare and load four clips, the
+        first three 10 seconds long and the last 2.25 seconds, one
+        might use.
+            Group fanfare ffare1 ffare2 ffare3 ffare4 [2.25]
+            Gload fanfare
+            Gwait
+        Due to built-in delays in preloading sound clips, the Gload
+        command may take several seconds to complete.  When using Gload
+        within a script, use a Gwait command to pause the script until
+        the Gload command completes.
+
+    Gplay volume/stop
+        Play the series of clips previously loaded by a Gload command.
+        The clips play in the background, allowing you to run commands
+        for a fireworks show while the clips are playing.  The clips
+        are played at the specified volume, with a default of 1 (the
+        loudest) if no volume is specified.  To stop a series of clips
+        from playing specify “Gplay stop”.
+
+    Gwait
+        Suspend script execution until an in-progress Gload or Gplay
+        command completes.
 
     Group gname member1 ...
         Define a group named gname consisting of the named members.
         Members may be previously declared Audio, Optical effects,
-        URLS, or the name of Groups containing the same kind of effects
+        URLs, or the name of Groups containing the same kind of effects
         (and, possibly, other Groups).  When a group name is specified
         on an Embed, Launch, Play, or Salvo command, one of the items
         it contains will be chosen at random.
@@ -145,7 +176,10 @@ characters and are insensitive to upper and lower case.)
         Sets the floating text legend above the launcher to the
         specified Text or clears the legend if no Text is given.  You
         can set the colour of the Text by prefixing it with an RGB
-        colour specification, with a default of green <0,1,0>.
+        colour specification, with a default of green <0,1,0>.  If the
+        Text contains the sub-string “<channel>”, it will be replaced
+        with the number of the channel on which the launcher is
+        listening for commands in local chat.
 
     Menu item1 ...
         Pop up a menu dialogue with the name items, which may use both
@@ -167,18 +201,18 @@ characters and are insensitive to upper and lower case.)
         another.
 
     Salvo n burst_effect burst_sound launch_effect launch_sound ascent_time hang_time burst_duration
-        Launch a salvo of n shells with the default parameters for the
+        Launch a salvo of n shells with parameters specified as for the
         Launch command.  If a Salvo command is entered while a previous
         salvo is in progress, if n is 0 the Salvo is cancelled.
         Otherwise, the number is added to the number remaining from the
         in-progress salvo.  If n is negative, it is taken as the
-        duration of the salvo in seconds: shells will be continued to
-        be launched at the specified “Set interval” range until the
-        specified time has elapsed.  Timed salvos are particularly
-        useful when you wish to synchronise fireworks with sound clips.
-        The optional arguments following the number of shells to launch
-        are the same as on the Launch command and will be used for all
-        launches in the salvo.
+        duration of the salvo in seconds: shells will be launched at
+        the specified “Set interval” range until the specified duration
+        has elapsed.  Timed salvos are particularly useful when you
+        wish to synchronise fireworks with sound clips.  The optional
+        arguments following the number of shells to launch are the same
+        as on the Launch command and will be used for all launches in
+        the salvo.
 
     Script
         These commands control the running of scripts stored in
@@ -189,7 +223,7 @@ characters and are insensitive to upper and lower case.)
         comments and ignored.
 
         Script list
-            Print a list of scripts in the inventory.  Only scripts
+            Print a list of scripts in the inventory.  Only notecards
             whose names begin with “Script: ” are listed and may be
             run.
 
@@ -275,8 +309,8 @@ characters and are insensitive to upper and lower case.)
             are launched between min and max, in degrees or radians
             according to the Set angles setting.  If no max is
             specified, the min setting will be used, setting a fixed
-            elevation.  Default is 45 to 90 degrees (all elevations
-            above the horizon).
+            elevation.  Default is 45 to 90 degrees (halfway between
+            the horizon and zenith to the zenith).
 
         Set interval min [ max ]
             Sets the limits on the interval, in seconds, between
@@ -294,7 +328,7 @@ characters and are insensitive to upper and lower case.)
             metres.
 
         Set top on/off
-            Opens and closes the top of the launcher.  Use “off” to tip
+            Opens or closes the top of the launcher.  Use “off” to tip
             the top upward to open and “on” to close.  The top starts
             closed.  If you wish to close the top after a sequence of
             launches commanded by a script, don't forget to use the
@@ -333,8 +367,8 @@ SPECIAL GROUP NAMES
 
 When you define a Group containing multiple optical or sound effects
 and specify the group name on the Launch command instead of a specific
-effect, one of the members of the group will be chosen at random.  If
-no effect is specified on the Launch command, it will select effects
+item, one of the members of the group will be chosen at random.  If no
+effect or sound is specified on the Launch command, it will select one
 from the following special groups.
     launch      Audio effect for shell launch
     ascent      Optical effect for shell ascent
@@ -385,22 +419,23 @@ Optical declaration.
      sbsmin     PSYS_SRC_BURST_SPEED_MIN    float
      sbsmax     PSYS_SRC_BURST_SPEED_MAX    float
 Some of these items have special values.  Those marked with a type of
-“angle” are floating point numbers representing degrees or radians
-depending upon the “Set angles” setting.  In the “psc” and “pec”
-specifications, the value can either be a <r,g,b> triple representing a
-colour with components between 0 and 1 or a triple with one or more
-negative numbers that denotes a colour in the HSV (hue, saturation, and
-value [brightness]) system where the negative component is chosen at
-random.  For example, a value of <-1,1,1> specifies colour with a
-randomly chosen hue, full saturation, and maximum brightness.  If the
-first component is -2, it denotes the most recently randomly chosen
-hue: a specification of <-2,1,0.2> chooses a colour with the same hue
-as the last, full saturation, but a brightness one fifth maximum.  The
-“stk” specification may name either the explicit key of an object,
-“self” to denote the fireworks shell itself, or “root” to refer to the
-launcher.  The “st” specification may either name a texture placed in
-the inventory of the object or the key (UUID) of a texture elsewhere on
-the Second Life grid.
+“angle” are floating point numbers representing angles, which are
+specified in radians in llParticleSystem() lists but as degrees in
+Optical statements.  In the “psc” and “pec” specifications, the value
+can either be an <r,g,b> triple representing a colour with components
+between 0 and 1 or a triple with one or more negative numbers that
+denotes a colour in the HSV (hue, saturation, and value [brightness])
+system where the negative component is chosen at random.  For example,
+a value of <-1,1,1> specifies colour with a randomly chosen hue, full
+saturation, and maximum brightness.  If the first component is -2, it
+denotes the most recently randomly chosen hue: a specification of
+<-2,1,0.2> chooses a colour with the same hue as the last, full
+saturation, but a brightness one fifth maximum.  The “stk”
+specification may name either the explicit key of an object, “self” to
+denote the effect emitter itself, or “root” to refer to its parent
+object.  The “st” specification may either name a texture placed in the
+inventory of the object or the key (UUID) of a texture elsewhere on the
+Second Life grid (whose permissions must allow you to use it).
 
 Optical declarations may occupy as many lines as are needed.
 Declarations with the same name are concatenated to form a single
@@ -415,25 +450,15 @@ chosen hues.
 
 THE OPTICAL EFFECT COMPILER
 
-Developing, debugging, and optimising optical effects can be a fussy,
-error-prone, and tedious business.  To expedite the process, a model
-called the “Optical Effect Compiler” is included with Fourmilab
-Fireworks.  This is a pyramid-shaped object that contains a script
-defining a particle effect in Linden Scripting Language.  When the
-script is reset, it displays the Optical statements which define the
-effect for Fourmilab Fireworks.  Touching the compiler pyramid toggles
-the particle effect on and off, allowing you to preview it and, by
-editing the script, adjust it to your satisfaction before copying the
-Optical statements into the Fireworks configuration notecard.  The
-Optical Effect Compiler makes it easy to convert particle effects
-you've found in script libraries into Optical declarations for the
-fireworks launcher.  The Compiler is supplied with definitions of a
-variety of particle systems you may use as starting points for your own
-experiments.
-
-The compiler supports the extended HSV colour specifications described
-above with negative first components, allowing you to develop and test
-them before deploying in the launcher configuration.
+Manually defining optical effects by writing Optical command can be
+tedious and error prone, and the trial and error process of adjusting
+parameters to get the effect you want time consuming.  Fourmilab
+Fireworks includes the Fourmilab Optical Effect Compiler, a separate
+object which automatically translates any Second Life particle system
+declaration into Optical statements usable with the fireworks launcher
+and enables you to edit and immediately preview the effect until it's
+satisfactory.  Please see the separate User Guide for the Optical
+Effect Compiler included with the product.
 
 CONFIGURATION NOTECARD
 
