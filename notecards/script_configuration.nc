@@ -1,5 +1,5 @@
-#Legend <0, 1, 0> /<channel>'
-Legend
+Legend <0, 1, 0> /<channel>
+#Legend
 
 #   Optical effects
 
@@ -17,10 +17,6 @@ Optical ants pf 257 pss <0.25, 0.25, 0> pes <1, 1, 0> psc <1, 1, 1>
 Optical ball pf 291 sp 2 sbrad 0.5 psc <-1, 1, 1> pec <-2, 1, 0> psa 1 pea 0
     Optical ball pss <1, 1, 0> pes <0.5, 0.5, 0> psg 0.2 peg 0 sma 0.2 pma 1 sbrat 20 sbpc 1000
     Optical ball sa <0, 0, 0> sbsmin 0.01 sbsmax 0.01
-Optical flames pf 291 sp 2 psa 1 pea 0 psc <1, 1, 1> pec <1, 1, 1>
-    Optical flames pss <0.25, 0.25, 0> pes <1, 1, 0> pma 0.8 sma 1.5 sa <0, 0, 0> sab 0
-    Optical flames sae 60.16056 sbpc 500 sbrad 0.1 sbrat 1 sbsmin 0 sbsmax 1.5 so <0, 0, 0>
-    Optical flames st a96ecd50-96e1-28b4-51ec-96b3112210c0
 Optical fountain pf 257 sp 4 pma 2 sma 1.5 sbsmin 2 sbsmax 3 sa <0, 0, -3>
     Optical fountain sbrat 0.05 sbpc 3000 sab 60.00003 sae 0 so <0, 0, 30> pss <0.25, 0.25, 0> psa 1
     Optical fountain pea 0.25 psc <-1, 1, 1> pec <-2, 1, 0.2>
@@ -45,7 +41,6 @@ Optical splodey sp 2 sbrad 0.02 psc <-1, 1, 1> pec <-2, 1, 0.2>
 
 Audio launch1 launch2 launch3
 Audio burst1 burst2 burst3 burst4 burst5 burst6 burst7 burst8
-Audio trombone
 Audio handel_hwv_351
 
 #   Ascent optical effects
