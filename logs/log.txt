@@ -581,3 +581,15 @@ open.  It is still possible to mess things up by, for example,
 resetting the script from the viewer with the top open, which provides
 us no notification of the event, but in almost all likely circumstances
 this should keep us out of trouble.
+
+Resetting the main script did not reset the Media Player or the Queued
+Sound Player because they were expecting an LM_SP_RESET message from
+the main script when it reset, but it was sending this message only
+LINK_THIS (the root prim), while these scripts reside in other links.
+I changed the state_entry() code to send the message to LINK_SET so
+scripts in all links will receive it.
+
+Modified the code that generates the commands echoed while executing
+launches from a salvo to identify timed salvo launches with the time
+remaining until its end rather than the meaningless huge number we used
+to show before.

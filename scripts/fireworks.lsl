@@ -220,8 +220,12 @@
 
     salvo() {
 @salvoNext;
+        string sct = (string) salvoCount;
+        if (salvoEnd > 0) {
+            sct = "T=" + (string) (salvoEnd - llGetTime());
+        }
         integer ok = processCommand(whoDat,
-            "LaSalvo:" + (string) salvoCount, 2);
+            "La_Salvo:" + sct, 2);
         //  If we've reached the end of a timed salvo, stop it
         if ((salvoEnd > 0) && (llGetTime() > salvoEnd)) {
             salvoEnd = 0;
@@ -876,7 +880,6 @@
             message = llStringTrim(llGetSubString(message, n + 1, -1), STRING_TRIM);
             n = llSubStringIndex(message, " ");
             message = llStringTrim(llGetSubString(message, n + 1, -1), STRING_TRIM);
-//tawk("URL " + sparam + "=(" + message + ")");
             if (!dictAdd(sparam, DTYPE_URL, message)) {
                 return FALSE;
             }
@@ -948,7 +951,7 @@
             llOwnerSay("Listening on /" + (string) commandChannel);
 
             //  Reset the script processor
-            llMessageLinked(LINK_THIS, LM_SP_RESET, "", whoDat);
+            llMessageLinked(LINK_SET, LM_SP_RESET, "", whoDat);
             llSleep(0.1);           // Allow script process to finish reset
             sendSettings();
             if (llGetInventoryType(configScript) == INVENTORY_NOTECARD) {
