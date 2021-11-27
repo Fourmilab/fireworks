@@ -612,7 +612,6 @@ tawk("Blooie!  Unknown type " + (string) rtype +
             //  Start listening on the command chat channel
             commandH = llListen(commandChannel, "", NULL_KEY, "");
             llOwnerSay("Listening on /" + (string) commandChannel);
-//crystals();
         }
 
         /*  The listen event handler processes messages from

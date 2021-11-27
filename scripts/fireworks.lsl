@@ -80,8 +80,8 @@
     integer LM_SP_SETTINGS = 59;        // Set operating modes
 
     //  Queued sound player messages
-//    integer LM_QP_RESET = 81;           // Reset script
-//    integer LM_QP_STAT = 82;            // Print status
+//  integer LM_QP_RESET = 81;           // Reset script
+//  integer LM_QP_STAT = 82;            // Print status
     integer LM_QP_LOAD = 83;            // Preload clips to play
     integer LM_QP_PLAY = 84;            // Play clips
     integer LM_QP_STOP = 85;            // Stop current clip
@@ -1035,14 +1035,12 @@
             //  LM_QP_LOADED (87): Group sound clips loaded
 
             } else if (num == LM_QP_LOADED) {
-//llOwnerSay("Sound clips loaded.");
                 gloading = FALSE;
                 gloaded = TRUE;
                 if (gwaiting) {
                     scriptResume();
                 }
             } else if (num == LM_QP_DONE) {
-//llOwnerSay("Sound clips done.");
                 gplaying = FALSE;
                 if (gwaiting) {
                     scriptResume();

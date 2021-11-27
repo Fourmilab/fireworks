@@ -379,7 +379,6 @@
             within this script.  */
 
         link_message(integer sender, integer num, string str, key id) {
-//ttawk("Script processor link message sender " + (string) sender + "  num " + (string) num + "  str " + str + "  id " + (string) id);
 
             //  LM_SP_INIT (50): Initialise script processor
 
