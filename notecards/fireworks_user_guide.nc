@@ -355,9 +355,20 @@ characters and are insensitive to upper and lower case.)
         avatar leaves the vicinity of the launcher and subsequently
         returns.  If you don't know the length of the audio (for
         example, if it's a live stream or Internet radio station), omit
-        the time specification entirely.  It is then up to user or
+        the time specification entirely.  It is then up to the user or
         notecard script to explicitly stop the audio at the appropriate
-        time with an Embed command specifying no URL.
+        time with an Embed command specifying no URL.  You can only
+        embed URLt for HTML documents containing a media player: you
+        cannot directly plan an MP3 or other media file from the Web.
+        To play such a file (for example, the public domain MP3 files
+        available on the Internet Archive, construct a URL which plays
+        them through the free Fourmilab Media Player with “autoplay”
+        set.  For example, to play a 78 RPM record of Glenn Miller's
+        band performing “In the Mood”, declare the URL with:
+            URL inmood https://www.fourmilab.ch/mp/?src=https://archive.org/download/78_in-the-mood_glenn-miller-and-his-orchestra-johnson-dash-hawkins_gbia0020402/04%20-%20In%20the%20Mood%20-%20Glenn%20Miller%20and%20his%20Orchestra.mp3&autoplay [3:41]
+        after which you can play it with “Embed inmood”.  To play any
+        other media file, just specify its URL as the “src=” in a
+        similar declaration.
 
     Wait
         Pause script execution until all launched fireworks have

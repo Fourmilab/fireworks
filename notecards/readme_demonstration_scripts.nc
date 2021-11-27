@@ -24,6 +24,15 @@ musical piece with a fireworks show while it is playing.
     hwv351
         Handel's "Music for the Royal Fireworks", BWV 351
 
+SHOWS SET TO INTERNET EMBEDDED MUSIC
+
+This script performs a show set to Glenn Miller's "In the Mood", played from a 1939
+78 RPM recording from the Internet Archive, played using the URL/Embed facility via
+the Fourmilab Media Player.
+
+    In the Mood
+        The Glenn Miller Orchestra, "In the Mood", 1939-08-01
+
 TOUCH TRIGGERED
 
 This script is run when a user touches the launcher.  It runs a simple show, but you can
