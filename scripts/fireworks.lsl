@@ -675,7 +675,7 @@
         //         ascent_time hang_time burst_duration
 
         } else if (abbrP(command, "la")) {
-            if (abbrP(command, "lasalvo")) {
+            if (abbrP(command, "la_salvo")) {
                 args = [ "la" ] + salvoArgs;
                 argn = llGetListLength(args);
             }

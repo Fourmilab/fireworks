@@ -593,3 +593,9 @@ Modified the code that generates the commands echoed while executing
 launches from a salvo to identify timed salvo launches with the time
 remaining until its end rather than the meaningless huge number we used
 to show before.
+
+2021 November 27
+
+The changes to improve user feedback from the Salvo command broke
+the ability to specify arguments on it to be passed to Launch
+commands it generates.  Fixed.
