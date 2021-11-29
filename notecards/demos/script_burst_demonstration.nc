@@ -5,6 +5,8 @@ set echo off
 clear
 
 set interval 2
+set top off
+script pause 0.25
 
 echo
 echo                    ants
@@ -109,4 +111,8 @@ wait
 script pause 2
 
 set interval 0.75 2.5
-echo Done.
+script pause 0.25
+set top on
+set echo on
+
+@echo Done.
