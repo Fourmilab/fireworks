@@ -6,7 +6,7 @@
 
 Downloaded fireworks texture from Shutterstock:
     https://www.shutterstock.com/image-vector/firework-boom-flame-colorful-festive-seamless-726887620
-under unlimited Web license as part of my subscription.  Dornloaded
+under unlimited Web license as part of my subscription.  Downloaded
 into textures/shutterstock_726887620.eps.
 
 Converted this image into a 5000x5000 PNG with:
@@ -171,7 +171,7 @@ Replaced the hard-coded setting of the floating text legend to the chat
 channel with a Legend command in the Configuration script.  In the
 process I ran into and fixed a bug in replacing "<channel>" in legend
 text with the channel number: if "<channel>" was the last thing in the
-string, the code which tried to replace it woulld trip over the old
+string, the code which tried to replace it would trip over the old
 gotcha that -1 means the end of string and not replace it properly.  I
 rewrote the code to use llDeleteSubString() and llInsertString() to
 avoid the problem.
@@ -599,3 +599,12 @@ to show before.
 The changes to improve user feedback from the Salvo command broke
 the ability to specify arguments on it to be passed to Launch
 commands it generates.  Fixed.
+
+2021 November 28
+
+Made a few fixes to demonstration scripts so they restore defaults
+after running.
+
+2021 November 29
+
+Version 1.0.
